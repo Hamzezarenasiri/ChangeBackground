@@ -6,13 +6,13 @@ import pytest
 from aio_pika import Channel
 from aio_pika.abc import AbstractExchange, AbstractQueue
 from aio_pika.pool import Pool
-from Background_changer.db.dependencies import get_db_session
-from Background_changer.db.utils import create_database, drop_database
-from Background_changer.services.rabbit.dependencies import get_rmq_channel_pool
-from Background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
-from Background_changer.services.redis.dependency import get_redis_pool
-from Background_changer.settings import settings
-from Background_changer.web.application import get_app
+from background_changer.db.dependencies import get_db_session
+from background_changer.db.utils import create_database, drop_database
+from background_changer.services.rabbit.dependencies import get_rmq_channel_pool
+from background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+from background_changer.services.redis.dependency import get_redis_pool
+from background_changer.settings import settings
+from background_changer.web.application import get_app
 from fakeredis import FakeServer
 from fakeredis.aioredis import FakeConnection
 from fastapi import FastAPI
@@ -43,8 +43,8 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
     :yield: new engine.
     """
-    from Background_changer.db.meta import meta  # noqa: WPS433
-    from Background_changer.db.models import load_all_models  # noqa: WPS433
+    from background_changer.db.meta import meta  # noqa: WPS433
+    from background_changer.db.models import load_all_models  # noqa: WPS433
 
     load_all_models()
 

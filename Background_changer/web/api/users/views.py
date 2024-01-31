@@ -1,9 +1,9 @@
-from Background_changer.db.models.users import UserCreate  # type: ignore
-from Background_changer.db.models.users import UserRead  # type: ignore
-from Background_changer.db.models.users import UserUpdate  # type: ignore
-from Background_changer.db.models.users import api_users  # type: ignore
-from Background_changer.db.models.users import auth_cookie  # type: ignore
-from Background_changer.db.models.users import auth_jwt  # type: ignore
+from background_changer.db.models.users import UserCreate  # type: ignore
+from background_changer.db.models.users import UserRead  # type: ignore
+from background_changer.db.models.users import UserUpdate  # type: ignore
+from background_changer.db.models.users import api_users  # type: ignore
+from background_changer.db.models.users import auth_cookie  # type: ignore
+from background_changer.db.models.users import auth_jwt  # type: ignore
 from fastapi import APIRouter
 
 router = APIRouter()

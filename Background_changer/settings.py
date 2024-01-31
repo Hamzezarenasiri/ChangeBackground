@@ -2,7 +2,7 @@ import enum
 import os
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Optional
+from typing import List, Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
@@ -46,14 +46,14 @@ class Settings(BaseSettings):
     db_echo: bool = False
 
     # Variables for Redis
-    redis_host: str = "Background_changer-redis"
+    redis_host: str = "background_changer-redis"
     redis_port: int = 6379
     redis_user: Optional[str] = None
     redis_pass: Optional[str] = None
     redis_base: Optional[int] = None
 
     # Variables for RabbitMQ
-    rabbit_host: str = "Background_changer-rmq"
+    rabbit_host: str = "background_changer-rmq"
     rabbit_port: int = 5672
     rabbit_user: str = "guest"
     rabbit_pass: str = "guest"
@@ -119,6 +119,24 @@ class Settings(BaseSettings):
         env_prefix="BACKGROUND_CHANGER_",
         env_file_encoding="utf-8",
     )
+
+    PROJECT_DESCRIPTION: str = "Remove background"
+    PROJECT_SERVERS: List[dict[str, str]] = [
+        {"url": "https://rmbg.afarin.top"},
+        {"url": "http://localhost:8000"},
+    ]
+    USER_IMAGE_MAX_FILE_SIZE: int = 100 * 2**20  # 100MB
+    DEFAULT_MAX_STR_LENGTH: int = 3145728  # 3MB
+    USER_IMAGE_SUPPORTED_FORMATS: List[str] = [
+        "image/jpeg",
+        "image/png",
+        # "image/webp",
+        # "image/svg+xml",
+    ]
+    REQUEST_ATTACHMENT_MAX_FILE_SIZE: int = 2**30 * 2
+    DEFAULT_MEDIA_PATH: str = "media"
+    DEFAULT_BACKGROUND_PATH: str = f"{DEFAULT_MEDIA_PATH}/backgrounds"
+    DEFAULT_IMAGES_PATH: str = f"{DEFAULT_MEDIA_PATH}/images"
 
 
 settings = Settings()

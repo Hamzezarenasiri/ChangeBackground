@@ -1,9 +1,9 @@
 from typing import Awaitable, Callable
 
-from Background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
-from Background_changer.services.redis.lifetime import init_redis, shutdown_redis
-from Background_changer.settings import settings
-from Background_changer.tkq import broker
+from background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+from background_changer.services.redis.lifetime import init_redis, shutdown_redis
+from background_changer.settings import settings
+from background_changer.tkq import broker
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator.instrumentation import (
     PrometheusFastApiInstrumentator,
@@ -57,12 +57,12 @@ def register_startup_event(
     @app.on_event("startup")
     async def _startup() -> None:  # noqa: WPS430
         app.middleware_stack = None
-        if not broker.is_worker_process:
-            await broker.startup()
+        # if not broker.is_worker_process:
+        #     await broker.startup()
         _setup_db(app)
-        init_redis(app)
-        init_rabbit(app)
-        setup_prometheus(app)
+        # init_redis(app)
+        # init_rabbit(app)
+        # setup_prometheus(app)
         app.middleware_stack = app.build_middleware_stack()
         pass  # noqa: WPS420
 
@@ -85,8 +85,8 @@ def register_shutdown_event(
             await broker.shutdown()
         await app.state.db_engine.dispose()
 
-        await shutdown_redis(app)
-        await shutdown_rabbit(app)
+        # await shutdown_redis(app)
+        # await shutdown_rabbit(app)
         pass  # noqa: WPS420
 
     return _shutdown

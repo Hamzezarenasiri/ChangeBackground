@@ -1,5 +1,5 @@
 import taskiq_fastapi
-from Background_changer.settings import settings
+from background_changer.settings import settings
 from taskiq import InMemoryBroker
 from taskiq_aio_pika import AioPikaBroker
 from taskiq_redis import RedisAsyncResultBackend
@@ -16,5 +16,5 @@ if settings.environment.lower() == "pytest":
 
 taskiq_fastapi.init(
     broker,
-    "Background_changer.web.application:get_app",
+    "background_changer.web.application:get_app",
 )

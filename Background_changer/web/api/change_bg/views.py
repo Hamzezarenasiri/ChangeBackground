@@ -1,6 +1,5 @@
 import shutil
 
-import devtools
 from fastapi import APIRouter, BackgroundTasks, UploadFile
 
 from background_changer.settings import settings
@@ -39,7 +38,6 @@ async def change_background(
         output_image_path=out_path,
         position=position,
     )
-    devtools.debug(locals())
     return Change_BgModelOutputDTO(
         file_path=out_path,
         file_link=f"{settings.PROJECT_SERVERS[0].get('url')}/{out_path}",

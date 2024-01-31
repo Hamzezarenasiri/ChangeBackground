@@ -1,7 +1,7 @@
 from aio_pika import Channel, Message
 from aio_pika.pool import Pool
-from Background_changer.services.rabbit.dependencies import get_rmq_channel_pool
-from Background_changer.web.api.rabbit.schema import RMQMessageDTO
+from background_changer.services.rabbit.dependencies import get_rmq_channel_pool
+from background_changer.web.api.rabbit.schema import RMQMessageDTO
 from fastapi import APIRouter, Depends
 
 router = APIRouter()

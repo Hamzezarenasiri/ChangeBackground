@@ -2,7 +2,8 @@ import os
 import shutil
 
 import uvicorn
-from Background_changer.settings import settings
+
+from background_changer.settings import settings
 
 
 def set_multiproc_dir() -> None:
@@ -34,7 +35,7 @@ def main() -> None:
     """Entrypoint of the application."""
     set_multiproc_dir()
     uvicorn.run(
-        "Background_changer.web.application:get_app",
+        "background_changer.web.application:get_app",
         workers=settings.workers_count,
         host=settings.host,
         port=settings.port,

@@ -1,8 +1,8 @@
 from typing import List
 
-from Background_changer.db.dao.dummy_dao import DummyDAO
-from Background_changer.db.models.dummy_model import DummyModel
-from Background_changer.web.api.dummy.schema import DummyModelDTO, DummyModelInputDTO
+from background_changer.db.dao.dummy_dao import DummyDAO
+from background_changer.db.models.dummy_model import DummyModel
+from background_changer.web.api.dummy.schema import DummyModelDTO, DummyModelInputDTO
 from fastapi import APIRouter
 from fastapi.param_functions import Depends
 

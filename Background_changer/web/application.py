@@ -1,19 +1,22 @@
 import logging
+import os
 from importlib import metadata
 
 import sentry_sdk
-from Background_changer.logging import configure_logging
-from Background_changer.settings import settings
-from Background_changer.web.api.router import api_router
-from Background_changer.web.lifetime import (
-    register_shutdown_event,
-    register_startup_event,
-)
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from starlette.staticfiles import StaticFiles
+
+from background_changer.logging import configure_logging
+from background_changer.settings import settings
+from background_changer.web.api.router import api_router
+from background_changer.web.lifetime import (
+    register_shutdown_event,
+    register_startup_event,
+)
 
 
 def get_app() -> FastAPI:
@@ -43,14 +46,25 @@ def get_app() -> FastAPI:
             ],
         )
     app = FastAPI(
-        title="Background_changer",
-        version=metadata.version("Background_changer"),
+        title="background_changer",
+        version=metadata.version("background_changer"),
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
     )
 
+    if not os.path.exists(settings.DEFAULT_MEDIA_PATH):
+        os.makedirs(settings.DEFAULT_MEDIA_PATH)
+    if not os.path.exists(settings.DEFAULT_BACKGROUND_PATH):
+        os.makedirs(settings.DEFAULT_BACKGROUND_PATH)
+    if not os.path.exists(settings.DEFAULT_IMAGES_PATH):
+        os.makedirs(settings.DEFAULT_IMAGES_PATH)
+    app.mount(
+        "/media",
+        StaticFiles(directory=settings.DEFAULT_MEDIA_PATH),
+        name="media",
+    )
     # Adds startup and shutdown events.
     register_startup_event(app)
     register_shutdown_event(app)
