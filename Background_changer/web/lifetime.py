@@ -1,17 +1,14 @@
-import logging
 from typing import Awaitable, Callable
 
-from fastapi import FastAPI
+from Background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+from Background_changer.services.redis.lifetime import init_redis, shutdown_redis
 from Background_changer.settings import settings
-from prometheus_fastapi_instrumentator.instrumentation import \
-    PrometheusFastApiInstrumentator
-from Background_changer.services.redis.lifetime import (init_redis,
-                                                                   shutdown_redis)
-from Background_changer.services.rabbit.lifetime import (init_rabbit,
-                                                                    shutdown_rabbit)
 from Background_changer.tkq import broker
+from fastapi import FastAPI
+from prometheus_fastapi_instrumentator.instrumentation import (
+    PrometheusFastApiInstrumentator,
+)
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.orm import sessionmaker
 
 
 def _setup_db(app: FastAPI) -> None:  # pragma: no cover
@@ -31,6 +28,8 @@ def _setup_db(app: FastAPI) -> None:  # pragma: no cover
     )
     app.state.db_engine = engine
     app.state.db_session_factory = session_factory
+
+
 def setup_prometheus(app: FastAPI) -> None:  # pragma: no cover
     """
     Enables prometheus integration.
@@ -42,7 +41,9 @@ def setup_prometheus(app: FastAPI) -> None:  # pragma: no cover
     ).expose(app, should_gzip=True, name="prometheus_metrics")
 
 
-def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:  # pragma: no cover
+def register_startup_event(
+    app: FastAPI,
+) -> Callable[[], Awaitable[None]]:  # pragma: no cover
     """
     Actions to run on application startup.
 
@@ -68,7 +69,9 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:  # pr
     return _startup
 
 
-def register_shutdown_event(app: FastAPI) -> Callable[[], Awaitable[None]]:  # pragma: no cover
+def register_shutdown_event(
+    app: FastAPI,
+) -> Callable[[], Awaitable[None]]:  # pragma: no cover
     """
     Actions to run on application's shutdown.
 
@@ -81,7 +84,7 @@ def register_shutdown_event(app: FastAPI) -> Callable[[], Awaitable[None]]:  # p
         if not broker.is_worker_process:
             await broker.shutdown()
         await app.state.db_engine.dispose()
-        
+
         await shutdown_redis(app)
         await shutdown_rabbit(app)
         pass  # noqa: WPS420

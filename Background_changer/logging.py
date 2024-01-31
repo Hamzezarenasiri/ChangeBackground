@@ -1,9 +1,10 @@
 import logging
 import sys
-from typing import Any, Union
+from typing import Union
 
 from loguru import logger
-from Background_changer.settings import settings
+
+from background_changer.settings import settings
 
 
 class InterceptHandler(logging.Handler):
@@ -38,6 +39,7 @@ class InterceptHandler(logging.Handler):
             level,
             record.getMessage(),
         )
+
 
 def configure_logging() -> None:  # pragma: no cover
     """Configures logging."""

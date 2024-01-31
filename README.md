@@ -1,4 +1,4 @@
-# Background_changer
+# Background Changer
 
 This project was generated using fastapi_template.
 
@@ -11,7 +11,7 @@ To run the project use this set of commands:
 
 ```bash
 poetry install
-poetry run python -m Background_changer
+poetry run python -m background_changer
 ```
 
 This will start the server on the configured host.
@@ -25,14 +25,14 @@ You can read more about poetry here: https://python-poetry.org/
 You can start the project with docker using this command:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . up --build
+docker compose -f deploy/docker-compose.yml --project-directory . up --build
 ```
 
 If you want to develop in docker with autoreload add `-f deploy/docker-compose.dev.yml` to your docker command.
 Like this:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
 ```
 
 This command exposes the web application on port 8000, mounts current directory and enables autoreload.
@@ -40,14 +40,14 @@ This command exposes the web application on port 8000, mounts current directory 
 But you have to rebuild image every time you modify `poetry.lock` or `pyproject.toml` with this command:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . build
+docker compose -f deploy/docker-compose.yml --project-directory . build
 ```
 
 ## Project structure
 
 ```bash
-$ tree "Background_changer"
-Background_changer
+$ tree "background_changer"
+background_changer
 ├── conftest.py  # Fixtures for all tests.
 ├── db  # module contains db configurations
 │   ├── dao  # Data Access Objects. Contains different classes to interact with database.
@@ -69,14 +69,14 @@ Background_changer
 This application can be configured with environment variables.
 
 You can create `.env` file in the root directory and place all
-environment variables here. 
+environment variables here.
 
 All environment variables should start with "BACKGROUND_CHANGER_" prefix.
 
-For example if you see in your "Background_changer/settings.py" a variable named like
-`random_parameter`, you should provide the "BACKGROUND_CHANGER_RANDOM_PARAMETER" 
+For example if you see in your "background_changer/settings.py" a variable named like
+`random_parameter`, you should provide the "BACKGROUND_CHANGER_RANDOM_PARAMETER"
 variable to configure the value. This behaviour can be changed by overriding `env_prefix` property
-in `Background_changer.settings.Settings.Config`.
+in `background_changer.settings.Settings.Config`.
 
 An example of .env file:
 ```bash
@@ -145,8 +145,8 @@ alembic revision
 If you want to run it in docker, simply run:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . run --build --rm api pytest -vv .
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . down
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . run --build --rm api pytest -vv .
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . down
 ```
 
 For running tests on your local machine.

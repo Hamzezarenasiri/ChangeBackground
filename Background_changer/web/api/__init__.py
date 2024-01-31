@@ -1,1 +1,1 @@
-"""Background_changer API package."""
+"""background_changer API package."""

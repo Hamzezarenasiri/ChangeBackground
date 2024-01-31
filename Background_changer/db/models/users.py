@@ -6,16 +6,14 @@ from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin, schemas
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
-
-    CookieTransport,
     JWTStrategy,
 )
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Background_changer.db.base import Base
-from Background_changer.db.dependencies import get_db_session
-from Background_changer.settings import settings
+from background_changer.db.base import Base
+from background_changer.db.dependencies import get_db_session
+from background_changer.settings import settings
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
@@ -36,11 +34,14 @@ class UserUpdate(schemas.BaseUserUpdate):
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     """Manages a user session and its tokens."""
+
     reset_password_token_secret = settings.users_secret
     verification_token_secret = settings.users_secret
 
 
-async def get_user_db(session: AsyncSession = Depends(get_db_session)) -> SQLAlchemyUserDatabase:
+async def get_user_db(
+    session: AsyncSession = Depends(get_db_session),
+) -> SQLAlchemyUserDatabase:
     """
     Yield a SQLAlchemyUserDatabase instance.
 
@@ -50,7 +51,9 @@ async def get_user_db(session: AsyncSession = Depends(get_db_session)) -> SQLAlc
     yield SQLAlchemyUserDatabase(session, User)
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)) -> UserManager:
+async def get_user_manager(
+    user_db: SQLAlchemyUserDatabase = Depends(get_user_db),
+) -> UserManager:
     """
     Yield a UserManager instance.
 
@@ -67,6 +70,8 @@ def get_jwt_strategy() -> JWTStrategy:
     :returns: instance of JWTStrategy with provided settings.
     """
     return JWTStrategy(secret=settings.users_secret, lifetime_seconds=None)
+
+
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 auth_jwt = AuthenticationBackend(
     name="jwt",

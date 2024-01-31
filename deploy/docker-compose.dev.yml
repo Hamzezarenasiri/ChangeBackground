@@ -14,12 +14,12 @@ services:
       # Enables autoreload.
       BACKGROUND_CHANGER_RELOAD: "True"
 
-  taskiq-worker:
-    volumes:
-      # Adds current directory as volume.
-      - .:/app/src/
-    command:
-      - taskiq
-      - worker
-      - Background_changer.tkq:broker
-      - --reload
+#  taskiq-worker:
+#    volumes:
+#      # Adds current directory as volume.
+#      - .:/app/src/
+#    command:
+#      - taskiq
+#      - worker
+#      - background_changer.tkq:broker
+#      - --reload

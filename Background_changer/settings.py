@@ -1,13 +1,14 @@
-import os
 import enum
+import os
 from pathlib import Path
 from tempfile import gettempdir
-from typing import List, Optional
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
 
 TEMP_DIR = Path(gettempdir())
+
 
 class LogLevel(str, enum.Enum):  # noqa: WPS600
     """Possible log levels."""
@@ -37,7 +38,7 @@ class Settings(BaseSettings):
 
     # Current environment
     environment: str = "dev"
-    
+
     log_level: LogLevel = LogLevel.INFO
     users_secret: str = os.getenv("USERS_SECRET", "")
     # Variables for the database
@@ -69,7 +70,6 @@ class Settings(BaseSettings):
     sentry_dsn: Optional[str] = None
     sentry_sample_rate: float = 1.0
 
-
     @property
     def db_url(self) -> URL:
         """
@@ -77,10 +77,8 @@ class Settings(BaseSettings):
 
         :return: database URL.
         """
-        return URL.build(
-            scheme="sqlite+aiosqlite",
-            path=f"///{self.db_file}"
-        )
+        return URL.build(scheme="sqlite+aiosqlite", path=f"///{self.db_file}")
+
     @property
     def redis_url(self) -> URL:
         """
@@ -99,6 +97,7 @@ class Settings(BaseSettings):
             password=self.redis_pass,
             path=path,
         )
+
     @property
     def rabbit_url(self) -> URL:
         """
@@ -114,12 +113,12 @@ class Settings(BaseSettings):
             password=self.rabbit_pass,
             path=self.rabbit_vhost,
         )
-    model_config = SettingsConfigDict(
-        env_file = ".env",
-        env_prefix = "BACKGROUND_CHANGER_",
-        env_file_encoding = "utf-8",
-    )
 
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="BACKGROUND_CHANGER_",
+        env_file_encoding="utf-8",
+    )
 
 
 settings = Settings()

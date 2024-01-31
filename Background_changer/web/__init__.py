@@ -1,1 +1,1 @@
-"""WEB API for Background_changer."""
+"""WEB API for background_changer."""

@@ -1,18 +1,19 @@
 import logging
-
-from fastapi import FastAPI
-from fastapi.responses import UJSONResponse
-from Background_changer.settings import settings
-from Background_changer.web.api.router import api_router
 from importlib import metadata
 
-from Background_changer.web.lifetime import (register_shutdown_event,
-                                                        register_startup_event)
 import sentry_sdk
+from Background_changer.logging import configure_logging
+from Background_changer.settings import settings
+from Background_changer.web.api.router import api_router
+from Background_changer.web.lifetime import (
+    register_shutdown_event,
+    register_startup_event,
+)
+from fastapi import FastAPI
+from fastapi.responses import UJSONResponse
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from Background_changer.logging import configure_logging
 
 
 def get_app() -> FastAPI:

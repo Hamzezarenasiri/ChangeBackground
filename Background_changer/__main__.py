@@ -3,6 +3,8 @@ import shutil
 
 import uvicorn
 from Background_changer.settings import settings
+
+
 def set_multiproc_dir() -> None:
     """
     Sets mutiproc_dir env variable.
@@ -40,6 +42,7 @@ def main() -> None:
         log_level=settings.log_level.value.lower(),
         factory=True,
     )
+
 
 if __name__ == "__main__":
     main()

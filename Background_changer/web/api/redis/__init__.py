@@ -1,4 +1,5 @@
 """Redis API."""
-from Background_changer.web.api.redis.views import router
 
-__all__ = ['router']
+from background_changer.web.api.redis.views import router
+
+__all__ = ["router"]

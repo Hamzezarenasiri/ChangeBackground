@@ -1,6 +1,9 @@
 FROM python:3.11.4-slim-bullseye as prod
 
 
+RUN apt-get update \
+&& apt-get install libgl1-mesa-glx libgl1-mesa-dev libglib2.0-0 -y \
+&& apt-get clean
 RUN pip install poetry==1.4.2
 
 # Configuring poetry
@@ -17,7 +20,7 @@ RUN poetry install --only main
 COPY . /app/src/
 RUN poetry install --only main
 
-CMD ["/usr/local/bin/python", "-m", "Background_changer"]
+CMD ["/usr/local/bin/python", "-m", "background_changer"]
 
 FROM prod as dev
 

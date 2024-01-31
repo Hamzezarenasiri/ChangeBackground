@@ -1,4 +1,4 @@
-name: Testing Background_changer
+name: Testing background_changer
 
 on: push
 
@@ -6,50 +6,50 @@ jobs:
   black:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Install deps
-        uses: knowsuchagency/poetry-install@v1
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
-      - name: Run black check
-        run: poetry run black --check .
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install deps
+      uses: knowsuchagency/poetry-install@v1
+      env:
+        POETRY_VIRTUALENVS_CREATE: false
+    - name: Run black check
+      run: poetry run black --check .
   flake8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Install deps
-        uses: knowsuchagency/poetry-install@v1
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
-      - name: Run flake8 check
-        run: poetry run flake8 --count .
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install deps
+      uses: knowsuchagency/poetry-install@v1
+      env:
+        POETRY_VIRTUALENVS_CREATE: false
+    - name: Run flake8 check
+      run: poetry run flake8 --count .
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Install deps
-        uses: knowsuchagency/poetry-install@v1
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
-      - name: Run mypy check
-        run: poetry run mypy .
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install deps
+      uses: knowsuchagency/poetry-install@v1
+      env:
+        POETRY_VIRTUALENVS_CREATE: false
+    - name: Run mypy check
+      run: poetry run mypy .
   pytest:
     runs-on: ubuntu-latest
     services:
 
-      Background_changer-rmq:
+      background_changer-rmq:
         image: rabbitmq:3.9.16-alpine
         env:
           RABBITMQ_DEFAULT_USER: "guest"
@@ -61,20 +61,19 @@ jobs:
           --health-timeout=5s
           --health-retries=8
         ports:
-          - 5672:5672
+        - 5672:5672
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Install deps
-        uses: knowsuchagency/poetry-install@v1
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
-      - name: Run pytest check
-        run: poetry run pytest -vv --cov="Background_changer" .
-        env:
-          BACKGROUND_CHANGER_HOST: "0.0.0.0"
-          BACKGROUND_CHANGER_RABBIT_HOST: localhost
-
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install deps
+      uses: knowsuchagency/poetry-install@v1
+      env:
+        POETRY_VIRTUALENVS_CREATE: false
+    - name: Run pytest check
+      run: poetry run pytest -vv --cov="background_changer" .
+      env:
+        BACKGROUND_CHANGER_HOST: "0.0.0.0"
+        BACKGROUND_CHANGER_RABBIT_HOST: localhost

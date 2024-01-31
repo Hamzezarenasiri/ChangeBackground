@@ -5,7 +5,9 @@ from starlette.requests import Request
 from taskiq import TaskiqDepends
 
 
-async def get_redis_pool(request: Request = TaskiqDepends()) -> AsyncGenerator[Redis, None]:  # pragma: no cover
+async def get_redis_pool(
+    request: Request = TaskiqDepends(),
+) -> AsyncGenerator[Redis, None]:  # pragma: no cover
     """
     Returns connection pool.
 

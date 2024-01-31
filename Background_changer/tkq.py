@@ -1,8 +1,9 @@
 import taskiq_fastapi
-from taskiq import InMemoryBroker, ZeroMQBroker
 from Background_changer.settings import settings
-from taskiq_redis import ListQueueBroker, RedisAsyncResultBackend
+from taskiq import InMemoryBroker
 from taskiq_aio_pika import AioPikaBroker
+from taskiq_redis import RedisAsyncResultBackend
+
 result_backend = RedisAsyncResultBackend(
     redis_url=str(settings.redis_url.with_path("/1")),
 )

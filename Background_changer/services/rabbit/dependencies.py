@@ -4,7 +4,9 @@ from fastapi import Request
 from taskiq import TaskiqDepends
 
 
-def get_rmq_channel_pool(request: Request = TaskiqDepends()) -> Pool[Channel]:  # pragma: no cover
+def get_rmq_channel_pool(
+    request: Request = TaskiqDepends(),
+) -> Pool[Channel]:  # pragma: no cover
     """
     Get channel pool from the state.
 

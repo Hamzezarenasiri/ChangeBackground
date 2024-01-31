@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from redis.asyncio import ConnectionPool
-from Background_changer.settings import settings
+
+from background_changer.settings import settings
 
 
 def init_redis(app: FastAPI) -> None:  # pragma: no cover

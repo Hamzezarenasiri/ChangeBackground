@@ -1,31 +1,29 @@
-import asyncio
-import sys
 import uuid
-from asyncio.events import AbstractEventLoop
-from typing import Any, AsyncGenerator, Generator
+from typing import Any, AsyncGenerator
 from unittest.mock import Mock
 
 import pytest
-from fastapi import FastAPI
-from httpx import AsyncClient
-from fakeredis import FakeServer
-from fakeredis.aioredis import FakeConnection
-from redis.asyncio import ConnectionPool
-from Background_changer.services.redis.dependency import get_redis_pool
 from aio_pika import Channel
 from aio_pika.abc import AbstractExchange, AbstractQueue
 from aio_pika.pool import Pool
-from Background_changer.services.rabbit.dependencies import \
-    get_rmq_channel_pool
-from Background_changer.services.rabbit.lifetime import (init_rabbit,
-                                                                    shutdown_rabbit)
-
-from Background_changer.settings import settings
-from Background_changer.web.application import get_app
-from sqlalchemy.ext.asyncio import (AsyncConnection, AsyncEngine, AsyncSession,
-                                    async_sessionmaker, create_async_engine)
 from Background_changer.db.dependencies import get_db_session
 from Background_changer.db.utils import create_database, drop_database
+from Background_changer.services.rabbit.dependencies import get_rmq_channel_pool
+from Background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+from Background_changer.services.redis.dependency import get_redis_pool
+from Background_changer.settings import settings
+from Background_changer.web.application import get_app
+from fakeredis import FakeServer
+from fakeredis.aioredis import FakeConnection
+from fastapi import FastAPI
+from httpx import AsyncClient
+from redis.asyncio import ConnectionPool
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +33,9 @@ def anyio_backend() -> str:
 
     :return: backend name.
     """
-    return 'asyncio'
+    return "asyncio"
+
+
 @pytest.fixture(scope="session")
 async def _engine() -> AsyncGenerator[AsyncEngine, None]:
     """
@@ -59,6 +59,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
     finally:
         await engine.dispose()
         await drop_database()
+
 
 @pytest.fixture
 async def dbsession(
@@ -88,6 +89,7 @@ async def dbsession(
         await session.close()
         await trans.rollback()
         await connection.close()
+
 
 @pytest.fixture
 async def test_rmq_pool() -> AsyncGenerator[Channel, None]:
@@ -168,6 +170,7 @@ async def test_queue(
 
         await queue.delete(if_unused=False, if_empty=False)
 
+
 @pytest.fixture
 async def fake_redis_pool() -> AsyncGenerator[ConnectionPool, None]:
     """
@@ -182,6 +185,7 @@ async def fake_redis_pool() -> AsyncGenerator[ConnectionPool, None]:
     yield pool
 
     await pool.disconnect()
+
 
 @pytest.fixture
 def fastapi_app(
@@ -204,7 +208,7 @@ def fastapi_app(
 @pytest.fixture
 async def client(
     fastapi_app: FastAPI,
-    anyio_backend: Any
+    anyio_backend: Any,
 ) -> AsyncGenerator[AsyncClient, None]:
     """
     Fixture that creates client for requesting server.
@@ -213,4 +217,4 @@ async def client(
     :yield: client for the app.
     """
     async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
-            yield ac
+        yield ac

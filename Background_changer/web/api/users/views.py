@@ -1,14 +1,10 @@
+from Background_changer.db.models.users import UserCreate  # type: ignore
+from Background_changer.db.models.users import UserRead  # type: ignore
+from Background_changer.db.models.users import UserUpdate  # type: ignore
+from Background_changer.db.models.users import api_users  # type: ignore
+from Background_changer.db.models.users import auth_cookie  # type: ignore
+from Background_changer.db.models.users import auth_jwt  # type: ignore
 from fastapi import APIRouter
-
-from Background_changer.db.models.users import (
-    UserCreate,  # type: ignore
-    UserRead,  # type: ignore
-    UserUpdate,  # type: ignore
-    api_users,  # type: ignore
-    auth_jwt,  # type: ignore
-    auth_cookie,  # type: ignore
-)
-
 
 router = APIRouter()
 
@@ -38,5 +34,5 @@ router.include_router(
 router.include_router(
     api_users.get_auth_router(auth_jwt),
     prefix="/auth/jwt",
-    tags=["auth"]
+    tags=["auth"],
 )

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from Background_changer.web.api.echo.schema import Message
+
+from background_changer.web.api.echo.schema import Message
 
 router = APIRouter()
 

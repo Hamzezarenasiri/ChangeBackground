@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.sqltypes import String
-from Background_changer.db.base import Base
+
+from background_changer.db.base import Base
 
 
 class DummyModel(Base):

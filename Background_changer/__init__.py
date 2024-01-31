@@ -1,1 +1,1 @@
-"""Background_changer package."""
+"""background_changer package."""
