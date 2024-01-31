@@ -1,0 +1,88 @@
+version: '3.9'
+
+services:
+  api: &main_app
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+      target: prod
+    image: Background_changer:${BACKGROUND_CHANGER_VERSION:-latest}
+    restart: always
+    env_file:
+      - .env
+    labels:
+      # Enables traefik for this container.
+      - traefik.enable=true
+      - traefik.http.routers.Background_changer.rule=Host(`${BACKGROUND_CHANGER_TRAEFIK_HOST:-Background_changer.localhost}`)
+      - traefik.http.routers.Background_changer.entrypoints=http
+      - traefik.http.routers.Background_changer.service=Background_changer
+      - traefik.http.services.Background_changer.loadbalancer.server.port=${BACKGROUND_CHANGER_PORT:-8000}
+    networks:
+      - default
+      - traefik-shared
+    depends_on:
+      redis:
+        condition: service_healthy
+      rmq:
+        condition: service_healthy
+    environment:
+      BACKGROUND_CHANGER_HOST: 0.0.0.0
+      BACKGROUND_CHANGER_DB_FILE: /db_data/db.sqlite3
+      BACKGROUND_CHANGER_RABBIT_HOST: Background_changer-rmq
+      BACKGROUND_CHANGER_REDIS_HOST: Background_changer-redis
+    volumes:
+      - Background_changer-db-data:/db_data/
+
+  taskiq-worker:
+    <<: *main_app
+    labels: []
+    command:
+      - taskiq
+      - worker
+      - Background_changer.tkq:broker
+
+  migrator:
+    image: Background_changer:${BACKGROUND_CHANGER_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      BACKGROUND_CHANGER_DB_FILE: /db_data/db.sqlite3
+    volumes:
+      - Background_changer-db-data:/db_data/
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "Background_changer-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+  rmq:
+    image: rabbitmq:3.9.16-alpine
+    hostname: "Background_changer-rmq"
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    healthcheck:
+      test: rabbitmq-diagnostics check_running -q
+      interval: 3s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  Background_changer-db-data:
+    name: Background_changer-db-data
+
+networks:
+  # Network for traefik.
+  traefik-shared:
+    name: traefik-shared
