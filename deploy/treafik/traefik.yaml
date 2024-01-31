@@ -1,0 +1,17 @@
+http:
+  routers:
+    my-app:
+      entryPoints:
+      - web
+
+      rule: "Host(`traefik.example.com`)"
+
+      service:
+        name: my-app
+        port: 8000
+
+  services:
+    my-app:
+      loadBalancer:
+        servers:
+        - url: http://my-fastapi-app:8000

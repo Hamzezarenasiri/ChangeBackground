@@ -4,6 +4,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from typing import List, Optional
 
+from pydantic import AnyHttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
 
@@ -121,7 +122,7 @@ class Settings(BaseSettings):
     )
 
     PROJECT_DESCRIPTION: str = "Remove background"
-    PROJECT_SERVERS: List[dict[str, str]] = [
+    PROJECT_SERVERS: List[dict[str, AnyHttpUrl]] = [
         {"url": "https://rmbg.afarin.top"},
         {"url": "http://localhost:8000"},
     ]

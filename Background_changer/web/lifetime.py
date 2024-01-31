@@ -1,14 +1,13 @@
 from typing import Awaitable, Callable
 
-from background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
-from background_changer.services.redis.lifetime import init_redis, shutdown_redis
-from background_changer.settings import settings
-from background_changer.tkq import broker
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator.instrumentation import (
     PrometheusFastApiInstrumentator,
 )
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from background_changer.settings import settings
+from background_changer.tkq import broker
 
 
 def _setup_db(app: FastAPI) -> None:  # pragma: no cover

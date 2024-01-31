@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+    - "--log.level=INFO"
+    - "--providers.docker.network=traefik-shared"
+    - "--entrypoints.web.address=:80"
+    - "--entrypoints.websecure.address=:443"
+    - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+    - "--certificatesresolvers.myresolver.acme.email=hamzezn@gmail.com"
+    - "--certificatesresolvers.myresolver.acme.storage=/acme/certs"
+    volumes:
+    - ./certs:/acme/certs
+    ports:
+    - "80:80"
+    - "443:443"
+  api:
+    ports:
+      # Exposes application port.
+    - "8000:8000"
+    build:
+      target: dev
+    volumes:
+      # Adds current directory as volume.
+    - .:/app/src/
+    environment:
+      # Enables autoreload.
+      BACKGROUND_CHANGER_RELOAD: "True"
+
+#  taskiq-worker:
+#    volumes:
+#      # Adds current directory as volume.
+#      - .:/app/src/
+#    command:
+#      - taskiq
+#      - worker
+#      - background_changer.tkq:broker
+#      - --reload

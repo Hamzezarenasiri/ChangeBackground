@@ -85,4 +85,3 @@ def change_background_image(
         position.width_position,
         position.scale_factor,
     )
-    return {"message": "Background changed successfully!"}
