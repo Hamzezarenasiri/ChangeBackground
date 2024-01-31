@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/upload/", response_model=Change_BgModelOutputDTO)
-async def change_background(
+def change_background(
     background_tasks: BackgroundTasks,
     car_image: UploadFile,
     background_image: UploadFile,

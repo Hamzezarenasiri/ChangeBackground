@@ -5,19 +5,17 @@ from rembg import remove
 from background_changer.web.api.change_bg.schema import Change_BgPositionModelInputDTO
 
 
-async def resize_pic_async(pic_path, reference_path, scale_factor=0.618):
+def resize_pic_async(pic_path, reference_path, scale_factor=0.618):
     reference = cv2.imread(reference_path)
     pic = cv2.imread(pic_path, cv2.IMREAD_UNCHANGED)
 
     new_width = int(reference.shape[1] * scale_factor)
     new_height = int((new_width / pic.shape[1]) * pic.shape[0])
 
-    resized_pic = cv2.resize(pic, (new_width, new_height))
-
-    return resized_pic
+    return cv2.resize(pic, (new_width, new_height))
 
 
-async def add_car_to_background_async(
+def add_car_to_background_async(
     car_path,
     background_path,
     output_path,
@@ -25,7 +23,7 @@ async def add_car_to_background_async(
     width_position: float = 0.5,
     scale_factor: float = 0.62,
 ):
-    car_resized = await resize_pic_async(car_path, background_path, scale_factor)
+    car_resized = resize_pic_async(car_path, background_path, scale_factor)
 
     background = cv2.imread(background_path)
     background_height, background_width, _ = background.shape
@@ -54,7 +52,7 @@ async def add_car_to_background_async(
     cv2.imwrite(output_path, background)
 
 
-async def remove_background_async(image_path, output_path):
+def remove_background_async(image_path, output_path):
     with open(image_path, "rb") as i:
         with open(output_path, "wb") as o:
             input_data = i.read()
@@ -62,7 +60,7 @@ async def remove_background_async(image_path, output_path):
             o.write(output_data)
 
 
-async def crop_to_object_async(image_path, output_path):
+def crop_to_object_async(image_path, output_path):
     image = Image.open(image_path).convert("RGBA")
     alpha = image.split()[3]
     bbox = alpha.getbbox()
@@ -70,16 +68,16 @@ async def crop_to_object_async(image_path, output_path):
     cropped_image.save(output_path, "PNG")
 
 
-async def change_background_image(
+def change_background_image(
     image_path,
     rm_image_path,
     background_image_path,
     output_image_path,
     position: Change_BgPositionModelInputDTO,
 ):
-    await remove_background_async(image_path, rm_image_path)
-    await crop_to_object_async(rm_image_path, rm_image_path)
-    await add_car_to_background_async(
+    remove_background_async(image_path, rm_image_path)
+    crop_to_object_async(rm_image_path, rm_image_path)
+    add_car_to_background_async(
         rm_image_path,
         background_image_path,
         output_image_path,
