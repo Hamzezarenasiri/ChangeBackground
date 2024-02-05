@@ -40,5 +40,5 @@ def change_background(
     )
     return Change_BgModelOutputDTO(
         file_path=out_path,
-        file_link=f"{settings.PROJECT_SERVERS[0].get('url')}/{out_path}",
+        file_link=f"{settings.PROJECT_SERVERS[0].get('url')}{out_path}",
     )
