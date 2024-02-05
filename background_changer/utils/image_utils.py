@@ -1,11 +1,19 @@
+import uuid
+from datetime import datetime
+
 import cv2
+import numpy as np
 from PIL import Image
-from rembg import remove
+from rembg import new_session, remove
 
-from background_changer.web.api.change_bg.schema import Change_BgPositionModelInputDTO
+from background_changer.web.api.change_bg.schema import ChangeBgPositionModelInputDto
 
 
-def resize_pic_async(pic_path, reference_path, scale_factor=0.618):
+def resize_pic(
+    pic_path: str,
+    reference_path: str,
+    scale_factor: float = 0.618,
+) -> np.ndarray:
     reference = cv2.imread(reference_path)
     pic = cv2.imread(pic_path, cv2.IMREAD_UNCHANGED)
 
@@ -15,15 +23,15 @@ def resize_pic_async(pic_path, reference_path, scale_factor=0.618):
     return cv2.resize(pic, (new_width, new_height))
 
 
-def add_car_to_background_async(
-    car_path,
-    background_path,
-    output_path,
+def add_car_to_background(
+    car_path: str,
+    background_path: str,
+    output_path: str,
     height_position: float = 0.69,
     width_position: float = 0.5,
     scale_factor: float = 0.62,
-):
-    car_resized = resize_pic_async(car_path, background_path, scale_factor)
+) -> None:
+    car_resized = resize_pic(car_path, background_path, scale_factor)
 
     background = cv2.imread(background_path)
     background_height, background_width, _ = background.shape
@@ -52,15 +60,32 @@ def add_car_to_background_async(
     cv2.imwrite(output_path, background)
 
 
-def remove_background_async(image_path, output_path):
+# rm_session = new_session("sam")
+rm_session = new_session()
+
+
+def remove_background(image_path: str, output_path: str) -> None:
+    """
+    Removes the background from an image and saves the result to the output path.
+
+    Args:
+        image_path (str): The path to the input image file.
+        output_path (str): The path to save the output image file.
+
+    Returns:
+        None
+
+    Examples:
+        remove_background("input.jpg", "output.jpg")
+    """
     with open(image_path, "rb") as i:
         with open(output_path, "wb") as o:
             input_data = i.read()
-            output_data = remove(data=input_data)
+            output_data = remove(data=input_data, session=rm_session)
             o.write(output_data)
 
 
-def crop_to_object_async(image_path, output_path):
+def crop_to_object(image_path, output_path):
     image = Image.open(image_path).convert("RGBA")
     alpha = image.split()[3]
     bbox = alpha.getbbox()
@@ -73,11 +98,11 @@ def change_background_image(
     rm_image_path,
     background_image_path,
     output_image_path,
-    position: Change_BgPositionModelInputDTO,
+    position: ChangeBgPositionModelInputDto,
 ):
-    remove_background_async(image_path, rm_image_path)
-    crop_to_object_async(rm_image_path, rm_image_path)
-    add_car_to_background_async(
+    remove_background(image_path, rm_image_path)
+    crop_to_object(rm_image_path, rm_image_path)
+    add_car_to_background(
         rm_image_path,
         background_image_path,
         output_image_path,
@@ -85,3 +110,13 @@ def change_background_image(
         position.width_position,
         position.scale_factor,
     )
+
+
+def generate_unique_name():
+    # Generate a unique identifier using UUID
+    unique_id = str(uuid.uuid4().hex)[:8]
+
+    # Get the current timestamp
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    return f"image_{timestamp}_{unique_id}"
