@@ -1,11 +1,12 @@
 import uuid
 
 import pytest
-from background_changer.db.dao.dummy_dao import DummyDAO
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
+from background_changer.db.dao.dummy_dao import DummyDAO
 
 
 @pytest.mark.anyio

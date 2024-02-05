@@ -6,13 +6,6 @@ import pytest
 from aio_pika import Channel
 from aio_pika.abc import AbstractExchange, AbstractQueue
 from aio_pika.pool import Pool
-from background_changer.db.dependencies import get_db_session
-from background_changer.db.utils import create_database, drop_database
-from background_changer.services.rabbit.dependencies import get_rmq_channel_pool
-from background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
-from background_changer.services.redis.dependency import get_redis_pool
-from background_changer.settings import settings
-from background_changer.web.application import get_app
 from fakeredis import FakeServer
 from fakeredis.aioredis import FakeConnection
 from fastapi import FastAPI
@@ -24,6 +17,14 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+
+from background_changer.db.dependencies import get_db_session
+from background_changer.db.utils import create_database, drop_database
+from background_changer.services.rabbit.dependencies import get_rmq_channel_pool
+from background_changer.services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+from background_changer.services.redis.dependency import get_redis_pool
+from background_changer.settings import settings
+from background_changer.web.application import get_app
 
 
 @pytest.fixture(scope="session")
