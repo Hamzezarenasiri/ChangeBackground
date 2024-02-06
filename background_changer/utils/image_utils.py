@@ -81,6 +81,7 @@ def remove_background(image_path: str, output_path: str) -> None:
         with open(output_path, "wb") as o:
             input_data = i.read()
             output_data = remove(data=input_data, session=rm_session)
+            output_data = remove(data=output_data, session=rm_session)
             o.write(output_data)
 
 
