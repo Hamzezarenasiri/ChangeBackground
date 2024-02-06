@@ -5,6 +5,7 @@ import httpx
 from fastapi import APIRouter, BackgroundTasks, UploadFile
 from PIL import Image
 from pydantic import AnyHttpUrl
+from starlette.responses import FileResponse
 
 from background_changer.settings import settings
 from background_changer.utils.image_utils import (
@@ -142,3 +143,57 @@ def change_background(
         ChangeBgPositionModelInputDto(),
     )
     return ChangeBgModelOutputDto(file_path=output_path, file_link=image_url)
+
+
+@router.post(
+    "/upload_image/",
+    response_class=FileResponse,
+)
+def change_background_and_return_file(
+    image: UploadFile,
+    background_image: UploadFile,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    background_image_path, _ = construct_file_path_and_url(background_image.filename)
+    with open(background_image_path, "wb") as buffer:
+        shutil.copyfileobj(background_image.file, buffer)
+    with open(image_path, "wb") as buffer2:
+        shutil.copyfileobj(image.file, buffer2)
+    output_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    change_background_image(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=output_path,
+        position=ChangeBgPositionModelInputDto(),
+    )
+    return output_path
+
+
+@router.post(
+    "/by_link_image/",
+    response_class=FileResponse,
+)
+async def change_background_by_image_urls_and_return_file(
+    payload: ChangeBgByLinkModelInputDto,
+):
+    file_name = str(generate_unique_name())
+    bg_name = f"bg_{generate_unique_name()}"
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    background_image_path = await save_background_image(
+        payload.background_link,
+        bg_name,
+    )
+    await fetch_and_save_image(str(payload.image_link), image_path)
+    rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
+    file_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    change_background_image(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=file_path,
+        position=payload.position or ChangeBgPositionModelInputDto(),
+    )
+    return file_path
