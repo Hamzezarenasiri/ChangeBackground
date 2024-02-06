@@ -22,12 +22,12 @@ class ChangeBgModelDto(BaseModel):
 
 class ChangeBgPositionModelInputDto(BaseModel):
     """
-    Represents the input data transfer object (DTO) for specifying the position and scaling of a car image on the background.
+    Represents the input data transfer object (DTO) for specifying the position and scaling of an image on the background.
 
     Attributes:
-        height_position (float, optional): The vertical position of the car image on the background. Defaults to 0.69.
-        width_position (float, optional): The horizontal position of the car image on the background. Defaults to 0.5.
-        scale_factor (float, optional): The scaling factor for the car image. Defaults to 0.62.
+        height_position (float, optional): The vertical position of the  image on the background. Defaults to 0.69.
+        width_position (float, optional): The horizontal position of the  image on the background. Defaults to 0.5.
+        scale_factor (float, optional): The scaling factor for the  image. Defaults to 0.62.
 
     Examples:
         input_dto = ChangeBgPositionModelInputDto(height_position=0.69, width_position=0.5, scale_factor=0.62)
@@ -41,23 +41,63 @@ class ChangeBgPositionModelInputDto(BaseModel):
 class ChangeBgByLinkModelInputDto(BaseModel):
     """
     Represents the input data transfer object (DTO)
-    for changing the background of a car image by providing links.
+    for changing the background of an image by providing links.
 
     Attributes:
-        car_link (HttpUrl): The URL link to the car image.
+        image_link (HttpUrl): The URL link to the  image.
         background_link (AnyHttpUrl): The URL link to the background image.
         position (Change_BgPositionModelInputDTO | None):
-        The position of the car image on the background, or None if not specified.
+        The position of the  image on the background, or None if not specified.
 
     Examples:
-        input_dto = ChangeBgByLinkModelInputDto(car_link="https://example.com/car.jpg",
+        input_dto = ChangeBgByLinkModelInputDto(image_link="https://example.com/car.jpg",
         background_link="https://example.com/background.jpg",
         position=Change_BgPositionModelInputDTO())
     """
 
-    car_link: HttpUrl
+    image_link: HttpUrl
     background_link: AnyHttpUrl
     position: ChangeBgPositionModelInputDto | None
+
+
+class BulkChangeBgByLinkModelInputDto(BaseModel):
+    """
+    Represents the input data transfer object (DTO)
+    for changing the background of a  image by providing links.
+
+    Attributes:
+        image_link (HttpUrl): The URL link to the  image.
+        background_link (AnyHttpUrl): The URL link to the background image.
+        position (Change_BgPositionModelInputDTO | None):
+        The position of the image on the background, or None if not specified.
+
+    Examples:
+        input_dto = ChangeBgByLinkModelInputDto(link="https://example.com/car.jpg",
+        background_link="https://example.com/background.jpg",
+        position=Change_BgPositionModelInputDTO())
+    """
+
+    image_links: list[HttpUrl]
+    background_link: AnyHttpUrl
+    position: ChangeBgPositionModelInputDto | None
+
+
+class BulkChangeBgModelOutputDto(BaseModel):
+    """
+    Represents the output data transfer object (DTO)
+    for the Change Background API endpoint.
+
+    Attributes:
+        file_path (str): The path to the output file.
+        file_link (AnyHttpUrl): The URL link to access the output file.
+
+    Examples:
+        output_dto = ChangeBgModelOutputDto(file_path="output.jpg",
+        file_link="https://example.com/output.jpg")
+    """
+
+    file_paths: list[str]
+    file_links: list[AnyHttpUrl]
 
 
 class ChangeBgModelOutputDto(BaseModel):

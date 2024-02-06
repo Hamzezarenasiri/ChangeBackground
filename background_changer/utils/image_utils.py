@@ -16,7 +16,6 @@ def resize_pic(
 ) -> np.ndarray:
     reference = cv2.imread(reference_path)
     pic = cv2.imread(pic_path, cv2.IMREAD_UNCHANGED)
-
     new_width = int(reference.shape[1] * scale_factor)
     new_height = int((new_width / pic.shape[1]) * pic.shape[0])
 
@@ -110,6 +109,12 @@ def change_background_image(
         position.width_position,
         position.scale_factor,
     )
+
+
+def remove_background_image(image_path, rm_image_path, crop: bool = True):
+    remove_background(image_path, rm_image_path)
+    if crop:
+        crop_to_object(rm_image_path, rm_image_path)
 
 
 def generate_unique_name():

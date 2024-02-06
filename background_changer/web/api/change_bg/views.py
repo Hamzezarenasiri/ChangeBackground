@@ -4,6 +4,7 @@ import shutil
 import httpx
 from fastapi import APIRouter, BackgroundTasks, UploadFile
 from PIL import Image
+from pydantic import AnyHttpUrl
 
 from background_changer.settings import settings
 from background_changer.utils.image_utils import (
@@ -11,6 +12,8 @@ from background_changer.utils.image_utils import (
     generate_unique_name,
 )
 from background_changer.web.api.change_bg.schema import (
+    BulkChangeBgByLinkModelInputDto,
+    BulkChangeBgModelOutputDto,
     ChangeBgByLinkModelInputDto,
     ChangeBgModelOutputDto,
     ChangeBgPositionModelInputDto,
@@ -19,81 +22,123 @@ from background_changer.web.api.change_bg.schema import (
 router = APIRouter()
 
 
-@router.post("/by_links/", response_model=ChangeBgModelOutputDto)
+async def fetch_and_save_image(url: str, path: str, img_format: str = "JPEG") -> None:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        image_bytes = await response.aread()
+        image = Image.open(io.BytesIO(image_bytes))
+        image.save(path, format=img_format)
+
+
+def construct_file_path_and_url(filename: str) -> tuple[str, str]:
+    file_path = f"{settings.DEFAULT_MEDIA_PATH}/{filename}"
+    file_url = f"{settings.PROJECT_SERVERS[0].get('url')}{file_path}"
+    return file_path, file_url
+
+
+async def save_background_image(background_link: AnyHttpUrl, bg_name: str) -> str:
+    background_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{bg_name}.jpg"
+    await fetch_and_save_image(str(background_link), background_image_path)
+    return background_image_path
+
+
+def add_background_task(
+    background_tasks: BackgroundTasks,
+    image_path: str,
+    rm_image_path: str,
+    background_image_path: str,
+    output_image_path: str,
+    position: ChangeBgPositionModelInputDto,
+):
+    background_tasks.add_task(
+        func=change_background_image,
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=output_image_path,
+        position=position,
+    )
+
+
+@router.post("/bulk_by_links/", response_model=BulkChangeBgModelOutputDto)
+async def bulk_change_backgrounds_by_image_urls(
+    background_tasks: BackgroundTasks,
+    payload: BulkChangeBgByLinkModelInputDto,
+):
+    file_paths: list[str] = []
+    file_links: list[AnyHttpUrl] = []
+    bg_name = f"bg_{generate_unique_name()}"
+    background_image_path = await save_background_image(
+        payload.background_link,
+        bg_name,
+    )
+    for image_link in payload.image_links:
+        file_name = str(generate_unique_name())
+        image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_image.jpg"
+        await fetch_and_save_image(str(image_link), image_path)
+        rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
+        file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+        file_paths.append(file_path)
+        file_links.append(file_url)
+        add_background_task(
+            background_tasks,
+            image_path,
+            rm_image_path,
+            background_image_path,
+            file_path,
+            payload.position or ChangeBgPositionModelInputDto(),
+        )
+    return BulkChangeBgModelOutputDto(file_paths=file_paths, file_links=file_links)
+
+
+@router.post("/by_link/", response_model=ChangeBgModelOutputDto)
 async def change_background_by_image_urls(
     background_tasks: BackgroundTasks,
     payload: ChangeBgByLinkModelInputDto,
 ):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(str(payload.car_link))
-        response.raise_for_status()
-        image_bytes = await response.aread()
-        image = Image.open(io.BytesIO(image_bytes))
-        car_path = f"{settings.DEFAULT_MEDIA_PATH}/car_{generate_unique_name()}.jpg"
-        image.save(car_path, format="JPEG")
-        back_response = await client.get(str(payload.background_link))
-        back_response.raise_for_status()
-        back_image_bytes = await back_response.aread()
-        back_image = Image.open(io.BytesIO(back_image_bytes))
-        background_image_path = (
-            f"{settings.DEFAULT_MEDIA_PATH}/bg_{generate_unique_name()}.jpg"
-        )
-        back_image.save(background_image_path, format="JPEG")
-
-    rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/rmbg_{generate_unique_name()}.png"
-    out_path = f"{settings.DEFAULT_MEDIA_PATH}/chbg_{generate_unique_name()}.jpg"
-    background_tasks.add_task(
-        func=change_background_image,
-        image_path=car_path,
-        rm_image_path=rm_image_path,
-        background_image_path=background_image_path,
-        output_image_path=out_path,
-        position=payload.position or ChangeBgPositionModelInputDto(),
+    file_name = str(generate_unique_name())
+    bg_name = f"bg_{generate_unique_name()}"
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    background_image_path = await save_background_image(
+        payload.background_link,
+        bg_name,
     )
-    return ChangeBgModelOutputDto(
-        file_path=out_path,
-        file_link=f"{settings.PROJECT_SERVERS[0].get('url')}{out_path}",
+    await fetch_and_save_image(str(payload.image_link), image_path)
+    rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
+    file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    add_background_task(
+        background_tasks,
+        image_path,
+        rm_image_path,
+        background_image_path,
+        file_path,
+        payload.position or ChangeBgPositionModelInputDto(),
     )
+    return ChangeBgModelOutputDto(file_path=file_path, file_link=file_url)
 
 
 @router.post("/upload/", response_model=ChangeBgModelOutputDto)
 def change_background(
     background_tasks: BackgroundTasks,
-    car_image: UploadFile,
+    image: UploadFile,
     background_image: UploadFile,
 ) -> ChangeBgModelOutputDto:
-    """
-    Changes the background of a car image using the provided background image.
-
-    Args:
-        background_tasks (BackgroundTasks): The background tasks manager.
-        car_image (UploadFile): The car image file to change the background of.
-        background_image (UploadFile): The background image file to use.
-
-    Return:
-        ChangeBgModelOutputDto: The output data transfer object (DTO) containing
-        the path and link to the changed background image.
-
-    Examples:
-        output_dto = change_background(background_tasks, car_image, background_image)
-    """
-    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{car_image.filename}"
-    background_image_path = (
-        f"{settings.DEFAULT_BACKGROUND_PATH}/{background_image.filename}"
-    )
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    background_image_path, _ = construct_file_path_and_url(background_image.filename)
     with open(background_image_path, "wb") as buffer:
         shutil.copyfileobj(background_image.file, buffer)
     with open(image_path, "wb") as buffer2:
-        shutil.copyfileobj(car_image.file, buffer2)
-    background_tasks.add_task(
-        func=change_background_image,
-        image_path=image_path,
-        rm_image_path=f"{settings.DEFAULT_MEDIA_PATH}/rmbg_{car_image.filename}.png",
-        background_image_path=background_image_path,
-        output_image_path=f"{settings.DEFAULT_MEDIA_PATH}/chbg_{car_image.filename}",
-        position=ChangeBgPositionModelInputDto(),
+        shutil.copyfileobj(image.file, buffer2)
+    output_path, image_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    add_background_task(
+        background_tasks,
+        image_path,
+        rm_image_path,
+        background_image_path,
+        output_path,
+        ChangeBgPositionModelInputDto(),
     )
-    return ChangeBgModelOutputDto(
-        file_path=f"{settings.DEFAULT_MEDIA_PATH}/chbg_{car_image.filename}",
-        file_link=f"{settings.PROJECT_SERVERS[0].get('url')}{settings.DEFAULT_MEDIA_PATH}/chbg_{car_image.filename}",
-    )
+    return ChangeBgModelOutputDto(file_path=output_path, file_link=image_url)
