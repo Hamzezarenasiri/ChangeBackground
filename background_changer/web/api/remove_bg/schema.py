@@ -50,14 +50,9 @@ class RemoveBgByLinkModelInputDto(BaseModel):
 
     Attributes:
         link (HttpUrl): The URL link to the image.
-        background_link (AnyHttpUrl): The URL link to the background image.
-        position (Remove_BgPositionModelInputDTO | None):
-        The position of the image on the background, or None if not specified.
 
     Examples:
         input_dto = RemoveBgByLinkModelInputDto(link="https://example.com/car.jpg",
-        background_link="https://example.com/background.jpg",
-        position=Remove_BgPositionModelInputDTO())
     """
 
     link: HttpUrl
@@ -70,12 +65,9 @@ class BulkRemoveBgByLinkModelInputDto(BaseModel):
 
     Attributes:
         link (HttpUrl): The URL link to the image.
-        position (Remove_BgPositionModelInputDTO | None):
-        The position of the image on the background, or None if not specified.
 
     Examples:
         input_dto = RemoveBgByLinkModelInputDto(link="https://example.com/car.jpg",
-        position=Remove_BgPositionModelInputDTO())
     """
 
     links: list[HttpUrl]
