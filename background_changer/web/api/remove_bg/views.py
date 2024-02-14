@@ -11,6 +11,7 @@ from background_changer.settings import settings
 from background_changer.utils.image_utils import (
     generate_unique_name,
     remove_background_image,
+    remove_background_image_2,
 )
 from background_changer.web.api.remove_bg.schema import (
     BulkRemoveBgByLinkModelInputDto,
@@ -72,6 +73,82 @@ async def remove_background_by_image_urls(
     return RemoveBgModelOutputDto(file_path=rm_image_path, file_link=file_url)
 
 
+@router.post(
+    "/upload_image/",
+    response_class=FileResponse,
+)
+def remove_background_and_return_file(
+    image: UploadFile,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    with open(image_path, "wb") as buffer2:
+        shutil.copyfileobj(image.file, buffer2)
+    remove_background_image(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+    )
+    return rm_image_path
+
+
+@router.post(
+    "/upload_image_2",
+    response_class=FileResponse,
+    tags=["Remove Background 2"],
+)
+def remove_background_and_return_file_2(
+    image: UploadFile,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    with open(image_path, "wb") as buffer2:
+        shutil.copyfileobj(image.file, buffer2)
+    remove_background_image_2(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+    )
+    return rm_image_path
+
+
+@router.post(
+    "/by_link_image/",
+    response_class=FileResponse,
+)
+async def remove_background_by_image_url_and_return_file(
+    payload: RemoveBgByLinkModelInputDto,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    await fetch_and_save_image(str(payload.link), image_path)
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    remove_background_image(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+    )
+    return rm_image_path
+
+
+@router.post(
+    "/by_link_image_2/",
+    response_class=FileResponse,
+    tags=["Remove Background 2"],
+)
+async def remove_background_by_image_url_and_return_file_2(
+    payload: RemoveBgByLinkModelInputDto,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    await fetch_and_save_image(str(payload.link), image_path)
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    remove_background_image_2(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+    )
+    return rm_image_path
+
+
 @router.post("/bulk_by_links/", response_model=BulkRemoveBgModelOutputDto)
 async def bulk_remove_backgrounds_by_image_urls(
     background_tasks: BackgroundTasks,
@@ -95,37 +172,26 @@ async def bulk_remove_backgrounds_by_image_urls(
 
 
 @router.post(
-    "/upload_image/",
-    response_class=FileResponse,
+    "/bulk_by_links_2/",
+    response_model=BulkRemoveBgModelOutputDto,
+    tags=["Remove Background 2"],
 )
-def remove_background_and_return_file(
-    image: UploadFile,
+async def bulk_remove_backgrounds_by_image_urls_2(
+    background_tasks: BackgroundTasks,
+    payload: BulkRemoveBgByLinkModelInputDto,
 ):
-    file_name = str(generate_unique_name())
-    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
-    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
-    with open(image_path, "wb") as buffer2:
-        shutil.copyfileobj(image.file, buffer2)
-    remove_background_image(
-        image_path=image_path,
-        rm_image_path=rm_image_path,
-    )
-    return rm_image_path
-
-
-@router.post(
-    "/by_link_image/",
-    response_class=FileResponse,
-)
-async def remove_background_by_image_url_and_return_file(
-    payload: RemoveBgByLinkModelInputDto,
-):
-    file_name = str(generate_unique_name())
-    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
-    await fetch_and_save_image(str(payload.link), image_path)
-    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
-    remove_background_image(
-        image_path=image_path,
-        rm_image_path=rm_image_path,
-    )
-    return rm_image_path
+    file_paths: list[str] = []
+    file_links: list[AnyHttpUrl] = []
+    for image_link in payload.links:
+        file_name = str(generate_unique_name())
+        image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_car.jpg"
+        await fetch_and_save_image(str(image_link), image_path)
+        rm_image_path, file_url = construct_file_path_and_url(f"{file_name}_rmbg.png")
+        file_paths.append(rm_image_path)
+        file_links.append(file_url)
+        background_tasks.add_task(
+            func=remove_background_image_2,
+            image_path=image_path,
+            rm_image_path=rm_image_path,
+        )
+    return BulkRemoveBgModelOutputDto(file_paths=file_paths, file_links=file_links)

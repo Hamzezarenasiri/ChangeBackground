@@ -3,10 +3,41 @@ from datetime import datetime
 
 import cv2
 import numpy as np
+import torch
+import torch.nn.functional as F
 from PIL import Image
 from rembg import new_session, remove
+from skimage import io
+from torchvision.transforms.functional import normalize
 
 from background_changer.web.api.change_bg.schema import ChangeBgPositionModelInputDto
+
+from .briarmbg import BriaRMBG
+
+
+def preprocess_image(im: np.ndarray, model_input_size: list) -> torch.Tensor:
+    if len(im.shape) < 3:
+        im = im[:, :, np.newaxis]
+    # orig_im_size=im.shape[0:2]
+    im_tensor = torch.tensor(im, dtype=torch.float32).permute(2, 0, 1)
+    im_tensor = F.interpolate(
+        torch.unsqueeze(im_tensor, 0),
+        size=model_input_size,
+        mode="bilinear",
+    ).type(torch.uint8)
+    image = torch.divide(im_tensor, 255.0)
+    image = normalize(image, [0.5, 0.5, 0.5], [1.0, 1.0, 1.0])
+    return image
+
+
+def postprocess_image(result: torch.Tensor, im_size: list) -> np.ndarray:
+    result = torch.squeeze(F.interpolate(result, size=im_size, mode="bilinear"), 0)
+    ma = torch.max(result)
+    mi = torch.min(result)
+    result = (result - mi) / (ma - mi)
+    im_array = (result * 255).permute(1, 2, 0).cpu().data.numpy().astype(np.uint8)
+    im_array = np.squeeze(im_array)
+    return im_array
 
 
 def resize_pic(
@@ -118,6 +149,39 @@ def remove_background_image(image_path, rm_image_path, crop: bool = True):
         crop_to_object(rm_image_path, rm_image_path)
 
 
+def remove_background_2(image_path, rm_image_path):
+    # net = BriaRMBG()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    net = BriaRMBG.from_pretrained("briaai/RMBG-1.4")
+    net.to(device)
+    net.eval()
+
+    # prepare input
+    model_input_size = [1024, 1024]
+    orig_im = io.imread(image_path)
+    orig_im_size = orig_im.shape[:2]
+    image = preprocess_image(orig_im, model_input_size).to(device)
+
+    # inference
+    result = net(image)
+
+    # post process
+    result_image = postprocess_image(result[0][0], orig_im_size)
+
+    # save result
+    pil_im = Image.fromarray(result_image)
+    no_bg_image = Image.new("RGBA", pil_im.size, (0, 0, 0, 0))
+    orig_image = Image.open(image_path)
+    no_bg_image.paste(orig_image, mask=pil_im)
+    no_bg_image.save(rm_image_path)
+
+
+def remove_background_image_2(image_path, rm_image_path, crop: bool = True):
+    remove_background_2(image_path, rm_image_path)
+    if crop:
+        crop_to_object(rm_image_path, rm_image_path)
+
+
 def generate_unique_name():
     # Generate a unique identifier using UUID
     unique_id = str(uuid.uuid4().hex)[:8]
@@ -126,3 +190,22 @@ def generate_unique_name():
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     return f"image_{timestamp}_{unique_id}"
+
+
+def change_background_image_2(
+    image_path,
+    rm_image_path,
+    background_image_path,
+    output_image_path,
+    position: ChangeBgPositionModelInputDto,
+):
+    remove_background_image_2(image_path, rm_image_path)
+    crop_to_object(rm_image_path, rm_image_path)
+    add_car_to_background(
+        rm_image_path,
+        background_image_path,
+        output_image_path,
+        position.height_position,
+        position.width_position,
+        position.scale_factor,
+    )

@@ -11,7 +11,7 @@ maintainers = [
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<3.12"
+python = ">=3.9,<3.12"
 fastapi = "^0.109.0"
 uvicorn = { version = "^0.27.0", extras = ["standard"] }
 fastapi-users = "^12.1.2"
@@ -37,6 +37,12 @@ taskiq-redis = "^0"
 taskiq-aio-pika = "^0"
 opencv-python = "^4.9.0.80"
 rembg = "^2.0.53"
+torch = "^2.2.0"
+torchvision = "^0.17.0"
+pillow = "^10.2.0"
+numpy = "^1.26.4"
+scikit-image = "^0.22.0"
+huggingface-hub = "^0.20.3"
 
 
 [tool.poetry.dev-dependencies]

@@ -10,6 +10,7 @@ from starlette.responses import FileResponse
 from background_changer.settings import settings
 from background_changer.utils.image_utils import (
     change_background_image,
+    change_background_image_2,
     generate_unique_name,
 )
 from background_changer.web.api.change_bg.schema import (
@@ -60,37 +61,6 @@ def add_background_task(
         output_image_path=output_image_path,
         position=position,
     )
-
-
-@router.post("/bulk_by_links/", response_model=BulkChangeBgModelOutputDto)
-async def bulk_change_backgrounds_by_image_urls(
-    background_tasks: BackgroundTasks,
-    payload: BulkChangeBgByLinkModelInputDto,
-):
-    file_paths: list[str] = []
-    file_links: list[AnyHttpUrl] = []
-    bg_name = f"bg_{generate_unique_name()}"
-    background_image_path = await save_background_image(
-        payload.background_link,
-        bg_name,
-    )
-    for image_link in payload.image_links:
-        file_name = str(generate_unique_name())
-        image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_image.jpg"
-        await fetch_and_save_image(str(image_link), image_path)
-        rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
-        file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
-        file_paths.append(file_path)
-        file_links.append(file_url)
-        add_background_task(
-            background_tasks,
-            image_path,
-            rm_image_path,
-            background_image_path,
-            file_path,
-            payload.position or ChangeBgPositionModelInputDto(),
-        )
-    return BulkChangeBgModelOutputDto(file_paths=file_paths, file_links=file_links)
 
 
 @router.post("/by_link/", response_model=ChangeBgModelOutputDto)
@@ -173,6 +143,34 @@ def change_background_and_return_file(
 
 
 @router.post(
+    "/upload_image_2/",
+    response_class=FileResponse,
+    tags=["Change Background 2"],
+)
+def change_background_and_return_file_2(
+    image: UploadFile,
+    background_image: UploadFile,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    background_image_path, _ = construct_file_path_and_url(background_image.filename)
+    with open(background_image_path, "wb") as buffer:
+        shutil.copyfileobj(background_image.file, buffer)
+    with open(image_path, "wb") as buffer2:
+        shutil.copyfileobj(image.file, buffer2)
+    output_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    change_background_image_2(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=output_path,
+        position=ChangeBgPositionModelInputDto(),
+    )
+    return output_path
+
+
+@router.post(
     "/by_link_image/",
     response_class=FileResponse,
 )
@@ -197,3 +195,97 @@ async def change_background_by_image_urls_and_return_file(
         position=payload.position or ChangeBgPositionModelInputDto(),
     )
     return file_path
+
+
+@router.post(
+    "/by_link_image_2/",
+    response_class=FileResponse,
+    tags=["Change Background 2"],
+)
+async def change_background_by_image_urls_and_return_file_2(
+    payload: ChangeBgByLinkModelInputDto,
+):
+    file_name = str(generate_unique_name())
+    bg_name = f"bg_{generate_unique_name()}"
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    background_image_path = await save_background_image(
+        payload.background_link,
+        bg_name,
+    )
+    await fetch_and_save_image(str(payload.image_link), image_path)
+    rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
+    file_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    change_background_image_2(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=file_path,
+        position=payload.position or ChangeBgPositionModelInputDto(),
+    )
+    return file_path
+
+
+@router.post("/bulk_by_links/", response_model=BulkChangeBgModelOutputDto)
+async def bulk_change_backgrounds_by_image_urls(
+    background_tasks: BackgroundTasks,
+    payload: BulkChangeBgByLinkModelInputDto,
+):
+    file_paths: list[str] = []
+    file_links: list[AnyHttpUrl] = []
+    bg_name = f"bg_{generate_unique_name()}"
+    background_image_path = await save_background_image(
+        payload.background_link,
+        bg_name,
+    )
+    for image_link in payload.image_links:
+        file_name = str(generate_unique_name())
+        image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_image.jpg"
+        await fetch_and_save_image(str(image_link), image_path)
+        rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
+        file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+        file_paths.append(file_path)
+        file_links.append(file_url)
+        add_background_task(
+            background_tasks,
+            image_path,
+            rm_image_path,
+            background_image_path,
+            file_path,
+            payload.position or ChangeBgPositionModelInputDto(),
+        )
+    return BulkChangeBgModelOutputDto(file_paths=file_paths, file_links=file_links)
+
+
+@router.post(
+    "/bulk_by_links_2/",
+    response_model=BulkChangeBgModelOutputDto,
+    tags=["Change Background 2"],
+)
+async def bulk_change_backgrounds_by_image_urls_2(
+    background_tasks: BackgroundTasks,
+    payload: BulkChangeBgByLinkModelInputDto,
+):
+    file_paths: list[str] = []
+    file_links: list[AnyHttpUrl] = []
+    bg_name = f"bg_{generate_unique_name()}"
+    background_image_path = await save_background_image(
+        payload.background_link,
+        bg_name,
+    )
+    for image_link in payload.image_links:
+        file_name = str(generate_unique_name())
+        image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_image.jpg"
+        await fetch_and_save_image(str(image_link), image_path)
+        rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
+        file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+        file_paths.append(file_path)
+        file_links.append(file_url)
+        background_tasks.add_task(
+            func=change_background_image_2,
+            image_path=image_path,
+            rm_image_path=rm_image_path,
+            background_image_path=background_image_path,
+            output_image_path=file_path,
+            position=payload.position,
+        )
+    return BulkChangeBgModelOutputDto(file_paths=file_paths, file_links=file_links)

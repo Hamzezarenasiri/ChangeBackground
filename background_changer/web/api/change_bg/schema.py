@@ -33,9 +33,9 @@ class ChangeBgPositionModelInputDto(BaseModel):
         input_dto = ChangeBgPositionModelInputDto(height_position=0.69, width_position=0.5, scale_factor=0.62)
     """
 
-    height_position: float = Field(default=0.69, le=1, ge=0)
+    height_position: float = Field(default=0.64, le=1, ge=0)
     width_position: float = Field(default=0.5, le=1, ge=0)
-    scale_factor: float = Field(default=0.62, le=1, ge=0)
+    scale_factor: float = Field(default=0.50, le=1, ge=0)
 
 
 class ChangeBgByLinkModelInputDto(BaseModel):
