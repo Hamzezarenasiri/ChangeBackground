@@ -38,26 +38,34 @@ def construct_file_path_and_url(filename: str) -> tuple[str, str]:
     return file_path, file_url
 
 
+def construct_file_path(filename: str) -> str:
+    return f"{settings.DEFAULT_MEDIA_PATH}/{filename}"
+
+
 async def save_background_image(background_link: AnyHttpUrl, bg_name: str) -> str:
     background_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{bg_name}.jpg"
     await fetch_and_save_image(str(background_link), background_image_path)
     return background_image_path
 
 
-def add_background_task(
+def change_background_task(
     background_tasks: BackgroundTasks,
+    file_name: str,
     image_path: str,
     rm_image_path: str,
     background_image_path: str,
     output_image_path: str,
     position: ChangeBgPositionModelInputDto,
+    container_name: str | None,
 ):
     background_tasks.add_task(
         func=change_background_image,
+        file_name=file_name,
         image_path=image_path,
         rm_image_path=rm_image_path,
         background_image_path=background_image_path,
         output_image_path=output_image_path,
+        container_name=container_name,
         position=position,
     )
 
@@ -67,7 +75,6 @@ async def bulk_change_backgrounds_by_image_urls(
     background_tasks: BackgroundTasks,
     payload: BulkChangeBgByLinkModelInputDto,
 ):
-    file_paths: list[str] = []
     file_links: list[AnyHttpUrl] = []
     bg_name = f"bg_{generate_unique_name()}"
     background_image_path = await save_background_image(
@@ -79,18 +86,22 @@ async def bulk_change_backgrounds_by_image_urls(
         image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_image.jpg"
         await fetch_and_save_image(str(image_link), image_path)
         rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
-        file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
-        file_paths.append(file_path)
+        file_path = construct_file_path(f"{file_name}_chbg.jpg")
+        file_url = f"https://{settings.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{payload.container_name}/{file_name}_chbg.jpg"
+        print("Public URL to view the image:", file_url)
         file_links.append(file_url)
-        add_background_task(
-            background_tasks,
-            image_path,
-            rm_image_path,
-            background_image_path,
-            file_path,
-            payload.position or ChangeBgPositionModelInputDto(),
+        change_background_task(
+            background_tasks=background_tasks,
+            file_name=file_name,
+            image_path=image_path,
+            rm_image_path=rm_image_path,
+            background_image_path=background_image_path,
+            output_image_path=file_path,
+            container_name=payload.container_name,
+            position=payload.position or ChangeBgPositionModelInputDto(),
         )
-    return BulkChangeBgModelOutputDto(file_paths=file_paths, file_links=file_links)
+
+    return BulkChangeBgModelOutputDto(file_links=file_links)
 
 
 @router.post("/by_link/", response_model=ChangeBgModelOutputDto)
@@ -107,14 +118,18 @@ async def change_background_by_image_urls(
     )
     await fetch_and_save_image(str(payload.image_link), image_path)
     rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
-    file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
-    add_background_task(
-        background_tasks,
-        image_path,
-        rm_image_path,
-        background_image_path,
-        file_path,
-        payload.position or ChangeBgPositionModelInputDto(),
+    file_path = construct_file_path(f"{file_name}_chbg.jpg")
+    file_url = f"https://{settings.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{payload.container_name}/{file_name}_chbg.jpg"
+    print("Public URL to view the image:", file_url)
+    change_background_task(
+        background_tasks=background_tasks,
+        file_name=file_name,
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=file_path,
+        container_name=payload.container_name,
+        position=payload.position or ChangeBgPositionModelInputDto(),
     )
     return ChangeBgModelOutputDto(file_path=file_path, file_link=file_url)
 
@@ -134,13 +149,15 @@ def change_background(
     with open(image_path, "wb") as buffer2:
         shutil.copyfileobj(image.file, buffer2)
     output_path, image_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
-    add_background_task(
-        background_tasks,
-        image_path,
-        rm_image_path,
-        background_image_path,
-        output_path,
-        ChangeBgPositionModelInputDto(),
+    change_background_task(
+        background_tasks=background_tasks,
+        file_name=file_name,
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+        background_image_path=background_image_path,
+        output_image_path=output_path,
+        # container_name=payload.container_name,
+        # position=payload.position or ChangeBgPositionModelInputDto(),
     )
     return ChangeBgModelOutputDto(file_path=output_path, file_link=image_url)
 
@@ -163,6 +180,7 @@ def change_background_and_return_file(
         shutil.copyfileobj(image.file, buffer2)
     output_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
     change_background_image(
+        file_name=file_name,
         image_path=image_path,
         rm_image_path=rm_image_path,
         background_image_path=background_image_path,
@@ -188,8 +206,11 @@ async def change_background_by_image_urls_and_return_file(
     )
     await fetch_and_save_image(str(payload.image_link), image_path)
     rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
-    file_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    file_path = construct_file_path(f"{file_name}_chbg.jpg")
+    file_url = f"https://{settings.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{payload.container_name}/{file_name}_chbg.jpg"
+    print("Public URL to view the image:", file_url)
     change_background_image(
+        file_name=file_name,
         image_path=image_path,
         rm_image_path=rm_image_path,
         background_image_path=background_image_path,

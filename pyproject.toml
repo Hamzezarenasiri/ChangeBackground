@@ -37,6 +37,7 @@ taskiq-redis = "^0"
 taskiq-aio-pika = "^0"
 opencv-python = "^4.9.0.80"
 rembg = "^2.0.53"
+azure-storage-blob = "^12.19.0"
 
 
 [tool.poetry.dev-dependencies]

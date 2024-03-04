@@ -33,9 +33,9 @@ class ChangeBgPositionModelInputDto(BaseModel):
         input_dto = ChangeBgPositionModelInputDto(height_position=0.69, width_position=0.5, scale_factor=0.62)
     """
 
-    height_position: float = Field(default=0.69, le=1, ge=0)
+    height_position: float = Field(default=0.64, le=1, ge=0)
     width_position: float = Field(default=0.5, le=1, ge=0)
-    scale_factor: float = Field(default=0.62, le=1, ge=0)
+    scale_factor: float = Field(default=0.50, le=1, ge=0)
 
 
 class ChangeBgByLinkModelInputDto(BaseModel):
@@ -57,6 +57,7 @@ class ChangeBgByLinkModelInputDto(BaseModel):
 
     image_link: HttpUrl
     background_link: AnyHttpUrl
+    container_name: str
     position: ChangeBgPositionModelInputDto | None
 
 
@@ -79,6 +80,7 @@ class BulkChangeBgByLinkModelInputDto(BaseModel):
 
     image_links: list[HttpUrl]
     background_link: AnyHttpUrl
+    container_name: str
     position: ChangeBgPositionModelInputDto | None
 
 
@@ -88,15 +90,12 @@ class BulkChangeBgModelOutputDto(BaseModel):
     for the Change Background API endpoint.
 
     Attributes:
-        file_path (str): The path to the output file.
         file_link (AnyHttpUrl): The URL link to access the output file.
 
     Examples:
-        output_dto = ChangeBgModelOutputDto(file_path="output.jpg",
-        file_link="https://example.com/output.jpg")
+        output_dto = ChangeBgModelOutputDto(file_link="https://example.com/output.jpg")
     """
 
-    file_paths: list[str]
     file_links: list[AnyHttpUrl]
 
 
@@ -106,13 +105,10 @@ class ChangeBgModelOutputDto(BaseModel):
     for the Change Background API endpoint.
 
     Attributes:
-        file_path (str): The path to the output file.
         file_link (AnyHttpUrl): The URL link to access the output file.
 
     Examples:
-        output_dto = ChangeBgModelOutputDto(file_path="output.jpg",
-        file_link="https://example.com/output.jpg")
+        output_dto = ChangeBgModelOutputDto(file_link="https://example.com/output.jpg")
     """
 
-    file_path: str
     file_link: AnyHttpUrl

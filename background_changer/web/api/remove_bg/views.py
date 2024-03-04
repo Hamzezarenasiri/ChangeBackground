@@ -77,21 +77,19 @@ async def bulk_remove_backgrounds_by_image_urls(
     background_tasks: BackgroundTasks,
     payload: BulkRemoveBgByLinkModelInputDto,
 ):
-    file_paths: list[str] = []
     file_links: list[AnyHttpUrl] = []
     for image_link in payload.links:
         file_name = str(generate_unique_name())
         image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_car.jpg"
         await fetch_and_save_image(str(image_link), image_path)
         rm_image_path, file_url = construct_file_path_and_url(f"{file_name}_rmbg.png")
-        file_paths.append(rm_image_path)
         file_links.append(file_url)
         background_tasks.add_task(
             func=remove_background_image,
             image_path=image_path,
             rm_image_path=rm_image_path,
         )
-    return BulkRemoveBgModelOutputDto(file_paths=file_paths, file_links=file_links)
+    return BulkRemoveBgModelOutputDto(file_links=file_links)
 
 
 @router.post(
