@@ -88,7 +88,7 @@ async def bulk_change_backgrounds_by_image_urls(
         await fetch_and_save_image(str(image_link), image_path)
         rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
         file_path = construct_file_path(f"{file_name}_chbg.jpg")
-        file_url = f"https://{settings.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{payload.container_name}/{file_name}_chbg.jpg"
+        file_url = f"/{payload.container_name}/{file_name}_chbg.jpg"
         print("Public URL to view the image:", file_url)
         file_links.append(file_url)
         change_background_task(
@@ -120,7 +120,7 @@ async def change_background_by_image_urls(
     await fetch_and_save_image(str(payload.image_link), image_path)
     rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
     file_path = construct_file_path(f"{file_name}_chbg.jpg")
-    file_url = f"https://{settings.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{payload.container_name}/{file_name}_chbg.jpg"
+    file_url = f"/{payload.container_name}/{file_name}_chbg.jpg"
     print("Public URL to view the image:", file_url)
     change_background_task(
         background_tasks=background_tasks,
@@ -236,7 +236,7 @@ async def change_background_by_image_urls_and_return_file(
     await fetch_and_save_image(str(payload.image_link), image_path)
     rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
     file_path = construct_file_path(f"{file_name}_chbg.jpg")
-    file_url = f"https://{settings.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{payload.container_name}/{file_name}_chbg.jpg"
+    file_url = f"/{payload.container_name}/{file_name}_chbg.jpg"
     print("Public URL to view the image:", file_url)
     change_background_image(
         file_name=file_name,
@@ -297,7 +297,7 @@ async def bulk_change_backgrounds_by_image_urls(
         file_path, file_url = construct_file_path_and_url(f"{file_name}_chbg.jpg")
         file_paths.append(file_path)
         file_links.append(file_url)
-        add_background_task(
+        change_background_task(
             background_tasks,
             image_path,
             rm_image_path,
