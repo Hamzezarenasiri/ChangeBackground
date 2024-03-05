@@ -68,7 +68,9 @@ class Settings(BaseSettings):
     prometheus_dir: Path = TEMP_DIR / "prom"
 
     # Sentry's configuration.
-    sentry_dsn: Optional[str] = None
+    sentry_dsn: Optional[
+        str
+    ] = "https://2d8fe08755186f68c69cac3adc80c7b4@o1178736.ingest.us.sentry.io/4506857577447424"
     sentry_sample_rate: float = 1.0
 
     @property
