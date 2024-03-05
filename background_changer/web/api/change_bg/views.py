@@ -107,7 +107,6 @@ async def bulk_change_backgrounds_by_image_urls(
 
 @router.post("/by_link/", response_model=ChangeBgModelOutputDto)
 async def change_background_by_image_urls(
-    background_tasks: BackgroundTasks,
     payload: ChangeBgByLinkModelInputDto,
 ):
     file_name = str(generate_unique_name())
@@ -122,8 +121,7 @@ async def change_background_by_image_urls(
     file_path = construct_file_path(f"{file_name}_chbg.jpg")
     file_url = f"/{payload.container_name}/{file_name}_chbg.jpg"
     print("Public URL to view the image:", file_url)
-    change_background_task(
-        background_tasks=background_tasks,
+    change_background_image(
         file_name=file_name,
         image_path=image_path,
         rm_image_path=rm_image_path,
