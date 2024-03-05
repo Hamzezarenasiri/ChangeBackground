@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime
 
@@ -10,6 +11,7 @@ from rembg import new_session, remove
 from skimage import io
 from torchvision.transforms.functional import normalize
 
+from background_changer.utils.azure_storage import upload_image_to_blob_storage
 from background_changer.web.api.change_bg.schema import ChangeBgPositionModelInputDto
 
 from .briarmbg import BriaRMBG
@@ -38,6 +40,14 @@ def postprocess_image(result: torch.Tensor, im_size: list) -> np.ndarray:
     im_array = (result * 255).permute(1, 2, 0).cpu().data.numpy().astype(np.uint8)
     im_array = np.squeeze(im_array)
     return im_array
+
+
+def delete_files(*args):
+    for file_path in args:
+        try:
+            os.remove(file_path)
+        except OSError as e:
+            print(f"Error deleting file {file_path}: {e}")
 
 
 def resize_pic(
@@ -125,11 +135,13 @@ def crop_to_object(image_path, output_path):
 
 
 def change_background_image(
+    file_name,
     image_path,
     rm_image_path,
     background_image_path,
     output_image_path,
     position: ChangeBgPositionModelInputDto,
+    container_name=None,
 ):
     remove_background(image_path, rm_image_path)
     crop_to_object(rm_image_path, rm_image_path)
@@ -140,6 +152,19 @@ def change_background_image(
         position.height_position,
         position.width_position,
         position.scale_factor,
+    )
+    if container_name:
+        upload_image_to_blob_storage(
+            output_image_path,
+            f"{file_name}_chbg.jpg",
+            container_name,
+        )
+    delete_files(
+        background_image_path,
+        image_path,
+        rm_image_path,
+        image_path,
+        output_image_path,
     )
 
 
