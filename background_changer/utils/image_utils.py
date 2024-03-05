@@ -134,6 +134,22 @@ def crop_to_object(image_path, output_path):
     cropped_image.save(output_path, "PNG")
 
 
+def get_content_type(image_path):
+    """Infers content type based on image file extension."""
+    extension = image_path.split(".")[-1].lower()
+    content_type_map = {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "gif": "image/gif",
+        # Add more extensions as needed
+    }
+    return content_type_map.get(
+        extension,
+        "application/octet-stream",
+    )  # Default if not found
+
+
 def change_background_image(
     file_name,
     image_path,
@@ -154,10 +170,12 @@ def change_background_image(
         position.scale_factor,
     )
     if container_name:
+        content_type = get_content_type(image_path)
         upload_image_to_blob_storage(
             output_image_path,
             f"{file_name}_chbg.jpg",
             container_name,
+            content_type,
         )
     delete_files(
         background_image_path,

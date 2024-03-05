@@ -10,7 +10,7 @@ account_key = settings.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
 
 
 # Upload image to Azure Blob Storage
-def upload_image_to_blob_storage(image_path, image_name, container_name):
+def upload_image_to_blob_storage(image_path, image_name, container_name, content_type):
     blob_service_client = BlobServiceClient(
         account_url=f"https://{account_name}.blob.core.windows.net",
         credential=account_key,
@@ -18,7 +18,7 @@ def upload_image_to_blob_storage(image_path, image_name, container_name):
     container_client = blob_service_client.get_container_client(container_name)
     blob_client = container_client.get_blob_client(image_name)
     with open(image_path, "rb") as data:
-        blob_client.upload_blob(data)
+        blob_client.upload_blob(data, content_type=content_type)
 
     blob_client = container_client.get_blob_client(image_name)
     return blob_client.url
