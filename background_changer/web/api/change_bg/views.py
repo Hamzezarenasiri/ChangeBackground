@@ -76,7 +76,7 @@ async def bulk_change_backgrounds_by_image_urls(
     background_tasks: BackgroundTasks,
     payload: BulkChangeBgByLinkModelInputDto,
 ):
-    file_links: list[AnyHttpUrl] = []
+    file_links: list[str] = []
     bg_name = f"bg_{generate_unique_name()}"
     background_image_path = await save_background_image(
         payload.background_link,
@@ -283,7 +283,7 @@ async def bulk_change_backgrounds_by_image_urls(
     payload: BulkChangeBgByLinkModelInputDto,
 ):
     file_paths: list[str] = []
-    file_links: list[AnyHttpUrl] = []
+    file_links: list[str] = []
     bg_name = f"bg_{generate_unique_name()}"
     background_image_path = await save_background_image(
         payload.background_link,
@@ -318,7 +318,7 @@ async def bulk_change_backgrounds_by_image_urls_2(
     payload: BulkChangeBgByLinkModelInputDto,
 ):
     file_paths: list[str] = []
-    file_links: list[AnyHttpUrl] = []
+    file_links: list[str] = []
     bg_name = f"bg_{generate_unique_name()}"
     background_image_path = await save_background_image(
         payload.background_link,

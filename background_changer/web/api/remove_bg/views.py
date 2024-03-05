@@ -179,7 +179,7 @@ async def bulk_remove_backgrounds_by_image_urls_2(
     payload: BulkRemoveBgByLinkModelInputDto,
 ):
     file_paths: list[str] = []
-    file_links: list[AnyHttpUrl] = []
+    file_links: list[str] = []
     for image_link in payload.links:
         file_name = str(generate_unique_name())
         image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_car.jpg"

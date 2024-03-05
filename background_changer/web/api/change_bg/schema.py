@@ -90,13 +90,13 @@ class BulkChangeBgModelOutputDto(BaseModel):
     for the Change Background API endpoint.
 
     Attributes:
-        file_link (AnyHttpUrl): The URL link to access the output file.
+        file_link (str): The URL link to access the output file.
 
     Examples:
-        output_dto = ChangeBgModelOutputDto(file_link="https://example.com/output.jpg")
+        output_dto = ChangeBgModelOutputDto(file_link="/output.jpg")
     """
 
-    file_links: list[AnyHttpUrl]
+    file_links: list[str]
 
 
 class ChangeBgModelOutputDto(BaseModel):
@@ -105,10 +105,10 @@ class ChangeBgModelOutputDto(BaseModel):
     for the Change Background API endpoint.
 
     Attributes:
-        file_link (AnyHttpUrl): The URL link to access the output file.
+        file_link (str): The URL link to access the output file.
 
     Examples:
-        output_dto = ChangeBgModelOutputDto(file_link="https://example.com/output.jpg")
+        output_dto = ChangeBgModelOutputDto(file_link="/output.jpg")
     """
 
-    file_link: AnyHttpUrl
+    file_link: str
