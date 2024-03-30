@@ -30,6 +30,11 @@ async def fetch_and_save_image(url: str, path: str, img_format: str = "JPEG") ->
         response.raise_for_status()
         image_bytes = await response.aread()
         image = Image.open(io.BytesIO(image_bytes))
+        # Check if the image is PNG
+        if image.format == "PNG":
+            # Convert to JPEG
+            image = image.convert("RGB")
+
         image.save(path, format=img_format)
 
 
