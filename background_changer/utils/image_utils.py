@@ -236,11 +236,13 @@ def generate_unique_name():
 
 
 def change_background_image_2(
+    file_name,
     image_path,
     rm_image_path,
     background_image_path,
     output_image_path,
     position: ChangeBgPositionModelInputDto,
+    container_name=None,
 ):
     remove_background_image_2(image_path, rm_image_path)
     crop_to_object(rm_image_path, rm_image_path)
@@ -251,4 +253,19 @@ def change_background_image_2(
         position.height_position,
         position.width_position,
         position.scale_factor,
+    )
+    if container_name:
+        content_type = get_content_type(image_path)
+        upload_image_to_blob_storage(
+            output_image_path,
+            f"{file_name}_chbg.jpg",
+            container_name,
+            content_type,
+        )
+    delete_files(
+        background_image_path,
+        image_path,
+        rm_image_path,
+        image_path,
+        output_image_path,
     )

@@ -270,14 +270,17 @@ async def change_background_by_image_urls_and_return_file_2(
     await fetch_and_save_image(str(payload.image_link), image_path)
     rm_image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_rmbg.png"
     file_path, _ = construct_file_path_and_url(f"{file_name}_chbg.jpg")
+    file_url = f"/{payload.container_name}/{file_name}_chbg.jpg"
     change_background_image_2(
+        file_name=file_name,
         image_path=image_path,
         rm_image_path=rm_image_path,
         background_image_path=background_image_path,
         output_image_path=file_path,
+        container_name=payload.container_name,
         position=payload.position or ChangeBgPositionModelInputDto(),
     )
-    return file_path
+    return ChangeBgModelOutputDto(file_path=file_path, file_link=file_url)
 
 
 @router.post("/bulk_by_links/", response_model=BulkChangeBgModelOutputDto)

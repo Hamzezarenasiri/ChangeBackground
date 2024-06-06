@@ -39,7 +39,7 @@ def construct_file_path_and_url(filename: str) -> tuple[str, str]:
 
 
 @router.post("/upload/", response_model=RemoveBgModelOutputDto)
-def remove_background(
+def remove_background_return_url(
     background_tasks: BackgroundTasks,
     image: UploadFile,
 ) -> RemoveBgModelOutputDto:
@@ -90,6 +90,32 @@ def remove_background_and_return_file(
         rm_image_path=rm_image_path,
     )
     return rm_image_path
+
+
+# @router.post(
+#     "/upload_image_2",
+#     response_class=FileResponse,
+#     tags=["Remove Background 2"],
+# )
+# def remove_background_and_return_file_2(
+#     image: UploadFile,
+# ):
+#     file_name = str(generate_unique_name())
+#     image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+#     rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+#     crp_image_path, _ = construct_file_path_and_url(f"{file_name}_crp.jpg")
+#     with open(image_path, "wb") as buffer2:
+#         shutil.copyfileobj(image.file, buffer2)
+#     # remove_background_2b(
+#     #     input_path=image_path,
+#     #     output_path=rm_image_path,
+#     # )
+#     detect_car_and_remove_bg(
+#         input_path=image_path,
+#         output_path=crp_image_path,
+#     )
+#     remove_background_2(crp_image_path, rm_image_path)
+#     return rm_image_path
 
 
 @router.post(
