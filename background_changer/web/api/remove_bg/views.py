@@ -40,7 +40,7 @@ def construct_file_path_and_url(filename: str) -> tuple[str, str]:
 
 
 @router.post("/upload/", response_model=RemoveBgModelOutputDto)
-def remove_background(
+def remove_background_return_url(
     background_tasks: BackgroundTasks,
     image: UploadFile,
 ) -> RemoveBgModelOutputDto:
@@ -91,6 +91,32 @@ def remove_background_and_return_file(
         rm_image_path=rm_image_path,
     )
     return rm_image_path
+
+
+# @router.post(
+#     "/upload_image_2",
+#     response_class=FileResponse,
+#     tags=["Remove Background 2"],
+# )
+# def remove_background_and_return_file_2(
+#     image: UploadFile,
+# ):
+#     file_name = str(generate_unique_name())
+#     image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+#     rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+#     crp_image_path, _ = construct_file_path_and_url(f"{file_name}_crp.jpg")
+#     with open(image_path, "wb") as buffer2:
+#         shutil.copyfileobj(image.file, buffer2)
+#     # remove_background_2b(
+#     #     input_path=image_path,
+#     #     output_path=rm_image_path,
+#     # )
+#     detect_car_and_remove_bg(
+#         input_path=image_path,
+#         output_path=crp_image_path,
+#     )
+#     remove_background_2(crp_image_path, rm_image_path)
+#     return rm_image_path
 
 
 @router.post(
@@ -174,21 +200,19 @@ async def bulk_remove_backgrounds_by_image_urls(
     background_tasks: BackgroundTasks,
     payload: BulkRemoveBgByLinkModelInputDto,
 ):
-    file_paths: list[str] = []
     file_links: list[AnyHttpUrl] = []
     for image_link in payload.links:
         file_name = str(generate_unique_name())
         image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_car.jpg"
         await fetch_and_save_image(str(image_link), image_path)
         rm_image_path, file_url = construct_file_path_and_url(f"{file_name}_rmbg.png")
-        file_paths.append(rm_image_path)
         file_links.append(file_url)
         background_tasks.add_task(
             func=remove_background_image,
             image_path=image_path,
             rm_image_path=rm_image_path,
         )
-    return BulkRemoveBgModelOutputDto(file_paths=file_paths, file_links=file_links)
+    return BulkRemoveBgModelOutputDto(file_links=file_links)
 
 
 @router.post(
@@ -201,7 +225,7 @@ async def bulk_remove_backgrounds_by_image_urls_2(
     payload: BulkRemoveBgByLinkModelInputDto,
 ):
     file_paths: list[str] = []
-    file_links: list[AnyHttpUrl] = []
+    file_links: list[str] = []
     for image_link in payload.links:
         file_name = str(generate_unique_name())
         image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_car.jpg"

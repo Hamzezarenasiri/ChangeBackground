@@ -68,7 +68,9 @@ class Settings(BaseSettings):
     prometheus_dir: Path = TEMP_DIR / "prom"
 
     # Sentry's configuration.
-    sentry_dsn: Optional[str] = None
+    sentry_dsn: Optional[
+        str
+    ] = "https://2d8fe08755186f68c69cac3adc80c7b4@o1178736.ingest.us.sentry.io/4506857577447424"
     sentry_sample_rate: float = 1.0
 
     @property
@@ -87,9 +89,7 @@ class Settings(BaseSettings):
 
         :return: redis URL.
         """
-        path = ""
-        if self.redis_base is not None:
-            path = f"/{self.redis_base}"
+        path = f"/{self.redis_base}" if self.redis_base is not None else ""
         return URL.build(
             scheme="redis",
             host=self.redis_host,
@@ -138,6 +138,8 @@ class Settings(BaseSettings):
     DEFAULT_MEDIA_PATH: str = "media"
     DEFAULT_BACKGROUND_PATH: str = f"{DEFAULT_MEDIA_PATH}/backgrounds"
     DEFAULT_IMAGES_PATH: str = f"{DEFAULT_MEDIA_PATH}/images"
+    AZURE_STORAGE_ACCOUNT_ACCESS_KEY: str = "/3N7mr9p8zx4aGDv0rgQLY/BFxUPMt9/FL5dCYe1JRgKNWu7iqnnsJZZv5xAMnX9SY3gAvkq8IK2/yyFjl8pQQ=="
+    AZURE_STORAGE_ACCOUNT_NAME: str = "hillzimage"
 
 
 settings = Settings()

@@ -57,6 +57,7 @@ class ChangeBgByLinkModelInputDto(BaseModel):
 
     image_link: HttpUrl
     background_link: AnyHttpUrl
+    container_name: str
     position: ChangeBgPositionModelInputDto | None
 
 
@@ -79,6 +80,7 @@ class BulkChangeBgByLinkModelInputDto(BaseModel):
 
     image_links: list[HttpUrl]
     background_link: AnyHttpUrl
+    container_name: str
     position: ChangeBgPositionModelInputDto | None
 
 
@@ -88,16 +90,13 @@ class BulkChangeBgModelOutputDto(BaseModel):
     for the Change Background API endpoint.
 
     Attributes:
-        file_path (str): The path to the output file.
-        file_link (AnyHttpUrl): The URL link to access the output file.
+        file_link (str): The URL link to access the output file.
 
     Examples:
-        output_dto = ChangeBgModelOutputDto(file_path="output.jpg",
-        file_link="https://example.com/output.jpg")
+        output_dto = ChangeBgModelOutputDto(file_link="/output.jpg")
     """
 
-    file_paths: list[str]
-    file_links: list[AnyHttpUrl]
+    file_links: list[str]
 
 
 class ChangeBgModelOutputDto(BaseModel):
@@ -106,13 +105,10 @@ class ChangeBgModelOutputDto(BaseModel):
     for the Change Background API endpoint.
 
     Attributes:
-        file_path (str): The path to the output file.
-        file_link (AnyHttpUrl): The URL link to access the output file.
+        file_link (str): The URL link to access the output file.
 
     Examples:
-        output_dto = ChangeBgModelOutputDto(file_path="output.jpg",
-        file_link="https://example.com/output.jpg")
+        output_dto = ChangeBgModelOutputDto(file_link="/output.jpg")
     """
 
-    file_path: str
-    file_link: AnyHttpUrl
+    file_link: str

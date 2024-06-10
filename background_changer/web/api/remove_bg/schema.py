@@ -1,4 +1,4 @@
-from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class RemoveBgModelDto(BaseModel):
@@ -79,16 +79,13 @@ class BulkRemoveBgModelOutputDto(BaseModel):
     for the Remove Background API endpoint.
 
     Attributes:
-        file_path (str): The path to the output file.
-        file_link (AnyHttpUrl): The URL link to access the output file.
+        file_link (str): The URL link to access the output file.
 
     Examples:
-        output_dto = RemoveBgModelOutputDto(file_path="output.jpg",
-        file_link="https://example.com/output.jpg")
+        output_dto = RemoveBgModelOutputDto(file_link="/output.jpg")
     """
 
-    file_paths: list[str]
-    file_links: list[AnyHttpUrl]
+    file_links: list[str]
 
 
 class RemoveBgModelOutputDto(BaseModel):
@@ -98,12 +95,12 @@ class RemoveBgModelOutputDto(BaseModel):
 
     Attributes:
         file_path (str): The path to the output file.
-        file_link (AnyHttpUrl): The URL link to access the output file.
+        file_link (str): The URL link to access the output file.
 
     Examples:
         output_dto = RemoveBgModelOutputDto(file_path="output.jpg",
-        file_link="https://example.com/output.jpg")
+        file_link="/output.jpg")
     """
 
     file_path: str
-    file_link: AnyHttpUrl
+    file_link: str

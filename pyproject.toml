@@ -43,6 +43,8 @@ pillow = "^10.2.0"
 numpy = "^1.26.4"
 scikit-image = "^0.22.0"
 huggingface-hub = "^0.20.3"
+azure-storage-blob = "^12.19.0"
+transformers = "^4.39.2"
 
 
 [tool.poetry.dev-dependencies]
