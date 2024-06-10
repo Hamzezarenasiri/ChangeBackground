@@ -12,6 +12,7 @@ from background_changer.utils.image_utils import (
     generate_unique_name,
     remove_background_image,
     remove_background_image_2,
+    remove_background_image_3,
 )
 from background_changer.web.api.remove_bg.schema import (
     BulkRemoveBgByLinkModelInputDto,
@@ -143,6 +144,25 @@ async def remove_background_by_image_url_and_return_file_2(
     await fetch_and_save_image(str(payload.link), image_path)
     rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
     remove_background_image_2(
+        image_path=image_path,
+        rm_image_path=rm_image_path,
+    )
+    return rm_image_path
+
+
+@router.post(
+    "/by_link_image_3/",
+    response_class=FileResponse,
+    tags=["Remove Background 3"],
+)
+async def remove_background_by_image_url_and_return_file_2(
+    payload: RemoveBgByLinkModelInputDto,
+):
+    file_name = str(generate_unique_name())
+    image_path = f"{settings.DEFAULT_MEDIA_PATH}/{file_name}_original.jpg"
+    await fetch_and_save_image(str(payload.link), image_path)
+    rm_image_path, _ = construct_file_path_and_url(f"{file_name}_rmbg.png")
+    remove_background_image_3(
         image_path=image_path,
         rm_image_path=rm_image_path,
     )
