@@ -293,7 +293,10 @@ def postprocess_image3(tensor, original_size):
     # Convert the tensor back to an image and resize to original size
     image = tensor.detach().cpu().numpy()
     image = np.clip(image * 255, 0, 255).astype(np.uint8)
-    image = image.transpose(1, 2, 0)  # Convert from (C, H, W) to (H, W, C)
+    if image.shape[0] == 1:  # If the image is a single channel, squeeze it
+        image = image.squeeze(axis=0)
+    else:
+        image = image.transpose(1, 2, 0)  # Convert from (C, H, W) to (H, W, C)
     image = Image.fromarray(image)
     image = image.resize(
         original_size,
@@ -312,7 +315,7 @@ def remove_background_preserve_shadows(image_path, rm_image_path):
     model_input_size = [1024, 1024]
     orig_im = io.imread(image_path)
     orig_im_size = orig_im.shape[:2]
-    image = preprocess_image(orig_im, model_input_size).to(device)
+    image = preprocess_image3(orig_im, model_input_size).to(device)
 
     # inference
     result = net(image)
