@@ -277,21 +277,27 @@ def change_background_image_2(
     )
 
 
-def preprocess_image(image, size):
+def preprocess_image3(image, size):
     # Resize and normalize the image for the model
     image = Image.fromarray(image)
-    image = image.resize(size, Image.ANTIALIAS)
+    image = image.resize(
+        size,
+        Image.Resampling.LANCZOS if hasattr(Image, "Resampling") else Image.LANCZOS,
+    )
     image = np.array(image).astype(np.float32) / 255.0
     image = torch.tensor(image).permute(2, 0, 1).unsqueeze(0)
     return image
 
 
-def postprocess_image(image, original_size):
+def postprocess_image3(image, original_size):
     # Convert the tensor back to an image and resize to original size
     image = image.detach().cpu().numpy()
     image = (image * 255).astype(np.uint8)
     image = Image.fromarray(image)
-    image = image.resize(original_size, Image.ANTIALIAS)
+    image = image.resize(
+        original_size,
+        Image.Resampling.LANCZOS if hasattr(Image, "Resampling") else Image.LANCZOS,
+    )
     return np.array(image)
 
 
@@ -305,13 +311,13 @@ def remove_background_preserve_shadows(image_path, rm_image_path):
     model_input_size = [1024, 1024]
     orig_im = io.imread(image_path)
     orig_im_size = orig_im.shape[:2]
-    image = preprocess_image(orig_im, model_input_size).to(device)
+    image = preprocess_image3(orig_im, model_input_size).to(device)
 
     # inference
     result = net(image)
 
     # post process
-    result_image = postprocess_image(result[0][0], orig_im_size)
+    result_image = postprocess_image3(result[0][0], orig_im_size)
 
     # save result
     pil_im = Image.fromarray(result_image)
