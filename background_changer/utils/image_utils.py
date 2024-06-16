@@ -58,12 +58,14 @@ def resize_pic(
     reference = cv2.imread(reference_path)
     pic = cv2.imread(pic_path, cv2.IMREAD_UNCHANGED)
 
-    pic_aspect_ratio = pic.shape[1] / pic.shape[0]
+    # Calculate aspect ratio of the reference image
+    reference_aspect_ratio = reference.shape[1] / reference.shape[0]
 
-    # Adjust the scale factor based on the aspect ratio
-    adjusted_scale_factor = scale_factor * (1.0 / (1.0 + abs(pic_aspect_ratio - 1.0)))
+    # Adjust the scale factor if the aspect ratio of the reference image is between 0.8 and 1.2
+    if 0.8 <= reference_aspect_ratio <= 1.2:
+        scale_factor *= 0.75
 
-    new_width = int(reference.shape[1] * adjusted_scale_factor)
+    new_width = int(reference.shape[1] * scale_factor)
     new_height = int((new_width / pic.shape[1]) * pic.shape[0])
 
     return cv2.resize(pic, (new_width, new_height))
