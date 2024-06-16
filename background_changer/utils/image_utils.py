@@ -130,7 +130,20 @@ def crop_to_object(image_path, output_path):
     image = Image.open(image_path).convert("RGBA")
     alpha = image.split()[3]
     bbox = alpha.getbbox()
+
     cropped_image = image.crop(bbox)
+
+    # Calculate aspect ratio
+    aspect_ratio = cropped_image.width / cropped_image.height
+
+    # Check if aspect ratio is less than 1.2 and resize if needed
+    if aspect_ratio < 1.2:
+        new_width = int(cropped_image.width * 0.8)
+        new_height = int(cropped_image.height * 0.8)
+        cropped_image = cropped_image.resize(
+            (new_width, new_height),
+            Image.Resampling.LANCZOS,
+        )
     cropped_image.save(output_path, "PNG")
 
 
