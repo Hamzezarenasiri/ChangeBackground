@@ -63,7 +63,7 @@ def resize_pic(
 
     # Adjust the scale factor if the aspect ratio of the reference image is between 0.8 and 1.2
     if 0.7 <= reference_aspect_ratio <= 1.35:
-        scale_factor *= 0.75
+        scale_factor *= 0.55
 
     new_width = int(reference.shape[1] * scale_factor)
     new_height = int((new_width / pic.shape[1]) * pic.shape[0])
