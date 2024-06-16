@@ -111,7 +111,7 @@ async def bulk_change_backgrounds_by_image_urls(
 
 
 @router.post("/by_link/", response_model=ChangeBgModelOutputDto)
-async def change_background_by_image_urls(
+async def change_background_by_image_urls_t(
     payload: ChangeBgByLinkModelInputDto,
 ):
     file_name = str(generate_unique_name())
