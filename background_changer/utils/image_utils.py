@@ -57,7 +57,13 @@ def resize_pic(
 ) -> np.ndarray:
     reference = cv2.imread(reference_path)
     pic = cv2.imread(pic_path, cv2.IMREAD_UNCHANGED)
-    new_width = int(reference.shape[1] * scale_factor)
+
+    pic_aspect_ratio = pic.shape[1] / pic.shape[0]
+
+    # Adjust the scale factor based on the aspect ratio
+    adjusted_scale_factor = scale_factor * (1.0 / (1.0 + abs(pic_aspect_ratio - 1.0)))
+
+    new_width = int(reference.shape[1] * adjusted_scale_factor)
     new_height = int((new_width / pic.shape[1]) * pic.shape[0])
 
     return cv2.resize(pic, (new_width, new_height))
@@ -130,20 +136,7 @@ def crop_to_object(image_path, output_path):
     image = Image.open(image_path).convert("RGBA")
     alpha = image.split()[3]
     bbox = alpha.getbbox()
-
     cropped_image = image.crop(bbox)
-
-    # Calculate aspect ratio
-    aspect_ratio = cropped_image.width / cropped_image.height
-
-    # Check if aspect ratio is less than 1.2 and resize if needed
-    if aspect_ratio < 1.2:
-        new_width = int(cropped_image.width * 0.8)
-        new_height = int(cropped_image.height * 0.8)
-        cropped_image = cropped_image.resize(
-            (new_width, new_height),
-            Image.Resampling.LANCZOS,
-        )
     cropped_image.save(output_path, "PNG")
 
 
