@@ -170,7 +170,7 @@ def change_background(
     "/upload_image/",
     response_class=FileResponse,
 )
-def change_background_and_return_file(
+def change_background_and_return_file_t(
     image: UploadFile,
     background_image: UploadFile,
 ):
